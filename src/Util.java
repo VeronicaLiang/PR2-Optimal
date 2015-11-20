@@ -30,7 +30,7 @@ public class Util {
 		return dist;
 	}
 
-	public static Boolean hitOrMiss(String add, Processor pro, int n, int a, int b, String l) {
+	public static Boolean hitOrMiss(String add, Processor pro, int n, int a, int b) {
 		// 0.......31-n+a|31-n+a+1.......31-b|31-b+1..........31
 		// |-------------|-------------------|-----------------|
 		// |TAG |SET INDEX |OFFSET |
@@ -40,31 +40,15 @@ public class Util {
 		String setloc = add.substring(32 - n + a + 1, 31 - b + 1);
 		String blocktag = add.substring(0, 31 - n + a + 1);
 
-		if (l.equals("l1")) {
-			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
-			// a should be equal to l1set.blockList.size()
-			for (int i = 0; i < l1set.blockList.size(); i++) {
-				if (blocktag.equals(l1set.blockList.get(i).tag)) {
-					// check whether the block state is invalid.
-					if (l1set.blockList.get(i).state != Directory.INVALID_STATE) {
-						return true;
-					} else {
-						return false;
-					}
-				}
-			}
-		} else if (l.equals("l2")) {
-			Set l2set = pro.l2.setsList.get(Integer.parseInt(setloc, 2));
-			for (int i = 0; i < l2set.blockList.size(); i++) {
-				if (blocktag.equals(l2set.blockList.get(i).tag)) {
-					// check whether the block state is invalid.
-					// TODO whether only when the state is "share" should return
-					// true
-					if (pro.l2.directory.blocktable.contains(add) && pro.l2.directory.blocktable.get(add).state != 0) {
-						return true;
-					} else {
-						return false;
-					}
+		Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
+		// a should be equal to l1set.blockList.size()
+		for (int i = 0; i < l1set.blockList.size(); i++) {
+			if (blocktag.equals(l1set.blockList.get(i).tag)) {
+				// check whether the block state is invalid.
+				if (l1set.blockList.get(i).state != Directory.INVALID_STATE) {
+					return true;
+				} else {
+					return false;
 				}
 			}
 		}
@@ -80,19 +64,20 @@ public class Util {
 		return zero_pad + value;
 	}
 
-	public static void storeBlockToCache(String add, String l, String coreid, int n, int a, int b, int cur_cycle,
-			Processor pro) {
-
+	public static int storeBlockToCache(String add, String l, String homeid, int cur_cycle) {
 		if (l.equals("l1")) {
-			String setloc = add.substring(32 - n + a + 1, 31 - b + 1);
+			Processor pro = Simulator.processorsTable.get(homeid);
+			String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
 			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
 			boolean flag = false;
 			int oldest_cycle = -1;
 			int oc_index = -1;
 			for (int i = 0; i < l1set.blockList.size(); i++) {
 				if (l1set.blockList.get(i).data == 0) {
-					l1set.blockList.get(i).tag = add.substring(0, 31 - n + a + 1);
+					l1set.blockList.get(i).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
 					l1set.blockList.get(i).data = 1;
+					l1set.blockList.get(i).state = Directory.SHARED_STATE;
+					l1set.blockList.get(i).cur_cycle = cur_cycle;
 					flag = true;
 					break;
 				}
@@ -102,13 +87,21 @@ public class Util {
 				}
 			}
 			if (!flag) {
-				l1set.blockList.get(oc_index).tag = add.substring(0, 31 - n + a + 1);
+				l1set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
 				l1set.blockList.get(oc_index).data = 1;
 				l1set.blockList.get(oc_index).cur_cycle = cur_cycle;
+			}else{
+				return 0;
 			}
 		} else if (l.equals("l2")) {
 			// TODO store block to cache
 		}
+		//TODO temporarily return 0
+		return 0;
+	}
+	
+	public static void setBlockStatus(int blockStatus) {
+		// TODO set state of block in node to some state
 	}
 
 }
