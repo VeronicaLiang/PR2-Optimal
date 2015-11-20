@@ -42,7 +42,41 @@ public class Reader {
 		return cur_cycle;
 	}
 	
-	public int exclusive (String localid, String homeid, String address) {
-		return 0;
+	public int exclusive (String localid, String homeid, String address, int cycle) {
+		Processor processor = Simulator.processorsTable.get(homeid);
+		
+		// 1. L sends request to H
+		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
+		cycle = manhattanDistance * Simulator.C + cycle;
+		
+		// 2. H return owner to L
+		cycle = manhattanDistance * Simulator.C + cycle;
+		
+		// 3. L get R, sends request to R
+		String remoteid = processor.l2.directory.blocktable.get(address).owner;
+		manhattanDistance = Util.getManhattanDistance(localid, remoteid, Simulator.p);
+		cycle = manhattanDistance * Simulator.C + cycle;
+		
+		// 4. R sends block to L and H
+		// set state of block to "shared"
+		Util.setBlockStatus(Directory.SHARED_STATE);
+		cycle = cycle + Math.max(Util.getManhattanDistance(localid, remoteid, Simulator.p), Util.getManhattanDistance(localid, remoteid, Simulator.p))*Simulator.C;
+		
+		// L get block
+		// store to L1
+		// set state of Block to "shared"
+		Util.storeBlockToCache(add, l, coreid, cur_cycle, pro);
+		Util.setBlockStatus(Directory.SHARED_STATE);
+		
+		// H change to "shared"
+		// store to L2
+		// add sharer
+		processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
+		Util.storeBlockToCache(add, l, coreid, cur_cycle, pro);
+		processor.l2.directory.blocktable.get(address).sharers.clear();
+		processor.l2.directory.blocktable.get(address).sharers.add(remoteid);
+		processor.l2.directory.blocktable.get(address).sharers.add(localid);
+		
+		return cycle;
 	}
 }

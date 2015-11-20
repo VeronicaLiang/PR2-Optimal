@@ -96,5 +96,9 @@ public class Util {
 		//TODO temporarily return 0
 		return 0;
 	}
+	
+	public static void setBlockStatus(int blockStatus) {
+		// TODO set state of block in node to some state
+	}
 
 }
