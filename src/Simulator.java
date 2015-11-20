@@ -93,7 +93,7 @@ public class Simulator {
 			}
 			for (int i = 0; i < waitingList.size(); i++) {
 				TraceItem cur = waitingList.get(i);
-				if (!runningList.containsKey(cur.previous) && !cur.issued) {
+				if (runningList.get(cur.tag) <= clockcycle && !cur.issued) {
 					if (cur.error > 0) {
 						cur.error = cur.error - 1;
 					} else {
@@ -113,7 +113,6 @@ public class Simulator {
 
 				}
 			}
-
 			clockcycle++;
 		}
 	}
@@ -234,7 +233,7 @@ public class Simulator {
 		int d1 = Integer.parseInt(args[9]);// The number of cycles caused by a
 											// memory access
 
-		Simulator simulator = new Simulator(inputFile, p, n1, n2, b, a1, a2, C, d, d1);
+		new Simulator(inputFile, p, n1, n2, b, a1, a2, C, d, d1);
 	}
 
 }

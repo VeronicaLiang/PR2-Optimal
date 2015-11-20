@@ -1,41 +1,62 @@
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Util {
-	public static int add (int a, int b) {
-		return a+b;
+	public static int add(int a, int b) {
+		return a + b;
 	}
+
+	public static void printOutputList(HashMap<Integer, ArrayList<String>> outputList) {
+
+	}
+
+	// TODO check whether this calculation is correct
+	public static int getManhattanDistance(String coreid, String homecoreid, int p) {
+		int edge = (int) Math.pow(2, p / 2);
+		int core_x = Integer.parseInt(coreid) / edge;
+		int core_y = Integer.parseInt(coreid) % edge;
+		int home_x = Integer.parseInt(homecoreid) / edge;
+		int home_y = Integer.parseInt(homecoreid) % edge;
+
+		int dist = Math.abs(core_x - core_y) + Math.abs(home_x - home_y);
+
+		return dist;
+	}
+
 	public static Boolean hitOrMiss(String add, Processor pro, int n, int a, int b, String l) {
 		// 0.......31-n+a|31-n+a+1.......31-b|31-b+1..........31
 		// |-------------|-------------------|-----------------|
-		// |TAG          |SET INDEX          |OFFSET           |
+		// |TAG |SET INDEX |OFFSET |
 		// |-------------|-------------------|-----------------|
 		// 31.........n-a|n-a-1.............b|b-1..............0
 
-		String setloc = add.substring(32-n+a+1, 31-b+1);
-		String blocktag = add.substring(0,31-n+a+1);
+		String setloc = add.substring(32 - n + a + 1, 31 - b + 1);
+		String blocktag = add.substring(0, 31 - n + a + 1);
 
 		if (l.equals("l1")) {
-			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc,2));
+			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
 			// a should be equal to l1set.blockList.size()
-			for (int i=0; i<l1set.blockList.size(); i++){
-				if(blocktag.equals(l1set.blockList.get(i).tag)){
+			for (int i = 0; i < l1set.blockList.size(); i++) {
+				if (blocktag.equals(l1set.blockList.get(i).tag)) {
 					// check whether the block state is invalid.
-					if(l1set.blockList.get(i).state != Directory.INVALID_STATE){
+					if (l1set.blockList.get(i).state != Directory.INVALID_STATE) {
 						return true;
-					}else{
+					} else {
 						return false;
 					}
 				}
 			}
 		} else if (l.equals("l2")) {
 			Set l2set = pro.l2.setsList.get(Integer.parseInt(setloc, 2));
-			for (int i=0; i<l2set.blockList.size(); i++){
-				if(blocktag.equals(l2set.blockList.get(i).tag)){
+			for (int i = 0; i < l2set.blockList.size(); i++) {
+				if (blocktag.equals(l2set.blockList.get(i).tag)) {
 					// check whether the block state is invalid.
-					// TODO whether only when the state is "share" should return true
-					if(pro.l2.directory.blocktable.contains(add) && pro.l2.directory.blocktable.get(add).state != 0){
+					// TODO whether only when the state is "share" should return
+					// true
+					if (pro.l2.directory.blocktable.contains(add) && pro.l2.directory.blocktable.get(add).state != 0) {
 						return true;
-					}else{
+					} else {
 						return false;
 					}
 				}
@@ -53,35 +74,35 @@ public class Util {
 		return zero_pad + value;
 	}
 
-	public static void storeBlockToCache(String add, String l, String coreid, int n, int a, int b, int cur_cycle, Processor pro) {
+	public static void storeBlockToCache(String add, String l, String coreid, int n, int a, int b, int cur_cycle,
+			Processor pro) {
 
-		if(l.equals("l1")){
-			String setloc = add.substring(32-n+a+1, 31-b+1);
-			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc,2));
+		if (l.equals("l1")) {
+			String setloc = add.substring(32 - n + a + 1, 31 - b + 1);
+			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
 			boolean flag = false;
 			int oldest_cycle = -1;
 			int oc_index = -1;
-			for(int i=0; i<l1set.blockList.size(); i++){
-				if (l1set.blockList.get(i).data == 0){
-					l1set.blockList.get(i).tag = add.substring(0,31-n+a+1);
+			for (int i = 0; i < l1set.blockList.size(); i++) {
+				if (l1set.blockList.get(i).data == 0) {
+					l1set.blockList.get(i).tag = add.substring(0, 31 - n + a + 1);
 					l1set.blockList.get(i).data = 1;
 					flag = true;
 					break;
 				}
-				if((oldest_cycle == -1)||(oldest_cycle > l1set.blockList.get(i).cur_cycle)){
+				if ((oldest_cycle == -1) || (oldest_cycle > l1set.blockList.get(i).cur_cycle)) {
 					oldest_cycle = l1set.blockList.get(i).cur_cycle;
 					oc_index = i;
 				}
 			}
-			if(!flag){
-				l1set.blockList.get(oc_index).tag = add.substring(0,31-n+a+1);
+			if (!flag) {
+				l1set.blockList.get(oc_index).tag = add.substring(0, 31 - n + a + 1);
 				l1set.blockList.get(oc_index).data = 1;
-				l1set.blockList.get(oc_index).cur_cycle=cur_cycle;
+				l1set.blockList.get(oc_index).cur_cycle = cur_cycle;
 			}
-		}else if (l.equals("l2")) {
+		} else if (l.equals("l2")) {
 			// TODO store block to cache
 		}
 	}
-
 
 }
