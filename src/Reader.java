@@ -43,6 +43,28 @@ public class Reader {
 		return cur_cycle;
 	}
 	
+	public int shared (String localid, String homeid, String address, int cycle) {
+		Processor processor = Simulator.processorsTable.get(homeid);
+		
+		// 1. L sends request to H
+		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
+		cycle = manhattanDistance * Simulator.C + cycle;
+		
+		// 2. H return block to L
+		// add sharer L
+		cycle = manhattanDistance * Simulator.C + Simulator.d + cycle;
+		processor.l2.directory.blocktable.get(address).sharers.add(localid);
+		
+		
+		// L get data
+		// store to l1
+		// set state of block to "shared"
+		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
+		Util.setBlockStatus(Directory.SHARED_STATE);
+		
+		return cycle;
+	}
+	
 	public int exclusive (String localid, String homeid, String address, int cycle) {
 		Processor processor = Simulator.processorsTable.get(homeid);
 		
