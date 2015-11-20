@@ -16,8 +16,7 @@ public class Reader {
 			System.out.println(coreid + ": L1 read hit");
 			return cycle+1;
 		} else {
-			int cycle_needed = readMiss(address, coreid, cycle);
-			return cycle+cycle_needed;
+			return readMiss(address, coreid, cycle);
 		}
 	}
 
@@ -29,7 +28,7 @@ public class Reader {
 		if(pro.l2.directory.blocktable.contains(add)){
 			if(pro.l2.directory.blocktable.get(add).state == Directory.SHARED_STATE){
 				cur_cycle = shared(coreid, homeid, add, cur_cycle);
-			}else if (pro.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE){
+			}else if (pro.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE) {
 				cur_cycle = exclusive(coreid, homeid, add, cur_cycle);
 			}
 		}else{
