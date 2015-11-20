@@ -85,8 +85,18 @@ public class Util {
 				if ((oldest_cycle == -1) || (oldest_cycle > l1set.blockList.get(i).cur_cycle)) {
 					oldest_cycle = l1set.blockList.get(i).cur_cycle;
 					oc_index = i;
-					Processor homepor = Simulator.processorsTable.get(homeid);
-
+					Processor homepro = Simulator.processorsTable.get(homeid);
+					String l2setloc =  add.substring(31-Simulator.n2+Simulator.a2+1,31-Simulator.b+1);
+					Set l2set = homepro.l2.setsList.get(Integer.parseInt(l2setloc,2));
+					String l2blocktag = add.substring(0,31-Simulator.n2+Simulator.a2+1);
+					for (int j=0; j<l2set.blockList.size(); j++){
+						Block check = l2set.blockList.get(j);
+						if(check.tag.equals(l2blocktag)){
+							check.cur_cycle = cur_cycle + Util.getManhattanDistance(coreid,homeid,Simulator.p);
+						}
+					}
+					pro.l2.directory.blocktable.get(add).state = Directory.SHARED_STATE;
+					pro.l2.directory.blocktable.get(add).sharers.remove(coreid);
 				}
 			}
 			if (!flag) {
