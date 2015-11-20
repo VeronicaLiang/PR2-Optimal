@@ -12,46 +12,46 @@ public class Simulator {
 	/*
 	 * The power of processors with a root of 2
 	 */
-	int p = 0;
+	public static int p = 0;
 	/*
 	 * The power of the size of every l1 with a root of 2
 	 */
-	int n1 = 0;
+	public static int n1 = 0;
 	/*
 	 * The power of the size of every l2 with a root of 2
 	 */
-	int n2 = 0;
+	public static int n2 = 0;
 	/*
 	 * The size of a block
 	 */
-	int b = 0;
+	public static int b = 0;
 	/*
 	 * The power of the associativity of l1 with a root of 2
 	 */
-	int a1 = 0;
+	public static int a1 = 0;
 	/*
 	 * The power of the associativity of l2 with a root of 2
 	 */
-	int a2 = 0;
+	public static int a2 = 0;
 	/*
 	 * The number of delay cycles caused by communicating between two nodes(a
 	 * node consists of a processor and l1 cache)
 	 */
-	int C = 0;
+	public static int C = 0;
 	/*
 	 * The number of cycles caused by a l2 hit(The l1 hit is satisfied in the
 	 * same cycle in which it is issued)
 	 */
-	int d = 0;
+	public static int d = 0;
 	/*
 	 * The number of cycles caused by a memory access
 	 */
-	int d1 = 0;
+	public static int d1 = 0;
 
-	HashMap<String, Processor> processorsTable = new HashMap<String, Processor>();
-	HashMap<Integer, ArrayList<String>> outputList = new HashMap<Integer, ArrayList<String>>();
-	ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
-	Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
+	public static HashMap<String, Processor> processorsTable = new HashMap<String, Processor>();
+	public static HashMap<Integer, ArrayList<String>> outputList = new HashMap<Integer, ArrayList<String>>();
+	public static ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
+	public static Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
 
 	public Simulator(String inputFile, int p, int n1, int n2, int b, int a1, int a2, int C, int d, int d1) {
 		this.p = p;
@@ -69,6 +69,7 @@ public class Simulator {
 		Reader reader = new Reader();
 		Writer writer = new Writer();
 		int finishCycle = 0;
+		int lastCycle = 0;
 		while (!finish) {
 			// extract all commands need to operate in this clock cycle
 			ArrayList<TraceItem> instructions = new ArrayList<TraceItem>();
@@ -87,6 +88,9 @@ public class Simulator {
 					} else if (cur.operationFlag == 1) {
 						// Issue a write operation
 						finishCycle = writer.run();
+					}
+					if (lastCycle < finishCycle) {
+						lastCycle = finishCycle;
 					}
 					runningList.put(cur.tag, finishCycle);
 				}
@@ -108,6 +112,9 @@ public class Simulator {
 							// Issue a write operation
 							finishCycle = writer.run();
 						}
+						if (lastCycle < finishCycle) {
+							lastCycle = finishCycle;
+						}
 						runningList.put(cur.tag, finishCycle);
 					}
 
@@ -115,6 +122,8 @@ public class Simulator {
 			}
 			clockcycle++;
 		}
+		
+		Util.printOutputList(outputList, lastCycle);
 	}
 
 	Hashtable<String, ArrayList<TraceItem>> initializeUnits(String inputFile) {

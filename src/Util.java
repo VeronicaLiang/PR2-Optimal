@@ -7,8 +7,14 @@ public class Util {
 		return a + b;
 	}
 
-	public static void printOutputList(HashMap<Integer, ArrayList<String>> outputList) {
-
+	public static void printOutputList(HashMap<Integer, ArrayList<String>> outputList, int last) {
+		ArrayList<String> strList = new ArrayList<String>();
+		for (int i = 0; i < last + 5; i++) {
+			
+			for (int j = 0; j < strList.size(); j++) {
+				
+			}
+		}
 	}
 
 	// TODO check whether this calculation is correct
