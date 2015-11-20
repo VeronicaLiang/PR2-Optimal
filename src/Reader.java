@@ -37,4 +37,8 @@ public class Reader {
 				" and fetch data from memory");
 		return cycle_used;
 	}
+	
+	public int exclusive () {
+		return 0;
+	}
 }

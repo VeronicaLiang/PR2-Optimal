@@ -72,11 +72,9 @@ public class Simulator {
 						// if this trace is consecutive, then add to waiting list
 						waitingList.add(cur);
 					} else {
-						Processor processor = (Processor) processorsTable.get(cur.coreid);
-						String address = cur.address;
 						if (cur.operationFlag == 0) {
 							// Issue a read operation
-							finishCycle = reader.run();
+							finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
 						} else if (cur.operationFlag == 1) {
 							// Issue a write operation
 							finishCycle = writer.run();
@@ -94,12 +92,10 @@ public class Simulator {
 							cur.error = cur.error - 1;
 						} else {
 							cur.issued = true;
-							Processor processor = (Processor) processorsTable.get(cur.coreid);
-							String address = cur.address;
 							runningList.put(cur.tag, 0);
 							if (cur.operationFlag == 0) {
 								// Issue a read operation
-								finishCycle = reader.run();
+								finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
 							} else if (cur.operationFlag == 1) {
 								// Issue a write operation
 								finishCycle = writer.run();
