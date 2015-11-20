@@ -64,10 +64,10 @@ public class Util {
 		return zero_pad + value;
 	}
 
-	public static void storeBlockToCache(String add, String l, String coreid, int cur_cycle,
-			Processor pro) {
+	public static int storeBlockToCache(String add, String l, String coreid, int cur_cycle) {
 
 		if (l.equals("l1")) {
+			Processor pro = Simulator.processorsTable.get(coreid);
 			String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
 			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
 			boolean flag = false;
@@ -93,6 +93,8 @@ public class Util {
 		} else if (l.equals("l2")) {
 			// TODO store block to cache
 		}
+		//TODO temporarily return 0
+		return 0;
 	}
 
 }
