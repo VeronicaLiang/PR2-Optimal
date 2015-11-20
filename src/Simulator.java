@@ -1,11 +1,8 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import javax.xml.bind.DatatypeConverter;
 
 /*
  * The simulator is trace driven. That is memory load and store operations will specified in an
@@ -50,9 +47,12 @@ public class Simulator {
 	 * The number of cycles caused by a memory access
 	 */
 	int d1 = 0;
-	
+
 	HashMap<String, Processor> processorsTable = new HashMap<String, Processor>();
-	
+	HashMap<Integer, ArrayList<String>> outputList = new HashMap<Integer, ArrayList<String>>();
+	ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
+	Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
+
 	public Simulator(String inputFile, int p, int n1, int n2, int b, int a1, int a2, int C, int d, int d1) {
 		this.p = p;
 		this.n1 = n1;
@@ -66,10 +66,58 @@ public class Simulator {
 		Hashtable<String, ArrayList<TraceItem>> commands = initializeUnits(inputFile);
 		int clockcycle = 1;
 		boolean finish = false;
+		Reader reader = new Reader();
+		Writer writer = new Writer();
+		int finishCycle = 0;
 		while (!finish) {
+			// extract all commands need to operate in this clock cycle
+			ArrayList<TraceItem> instructions = new ArrayList<TraceItem>();
+			instructions = commands.get(String.valueOf(clockcycle));
+			for (int i = 0; i < instructions.size(); i++) {
+				TraceItem cur = instructions.get(i);
+				if (cur.consecutive) {
+					// if this trace is consecutive, then add to waiting list
+					waitingList.add(cur);
+				} else {
+					Processor processor = (Processor) processorsTable.get(cur.coreid);
+					String address = cur.address;
+					if (cur.operationFlag == 0) {
+						// Issue a read operation
+						finishCycle = reader.run();
+					} else if (cur.operationFlag == 1) {
+						// Issue a write operation
+						finishCycle = writer.run();
+					}
+					runningList.put(cur.tag, finishCycle);
+				}
+			}
+			for (int i = 0; i < waitingList.size(); i++) {
+				TraceItem cur = waitingList.get(i);
+				if (!runningList.containsKey(cur.previous) && !cur.issued) {
+					if (cur.error > 0) {
+						cur.error = cur.error - 1;
+					} else {
+						cur.issued = true;
+						Processor processor = (Processor) processorsTable.get(cur.coreid);
+						String address = cur.address;
+						runningList.put(cur.tag, 0);
+						if (cur.operationFlag == 0) {
+							// Issue a read operation
+							finishCycle = reader.run();
+						} else if (cur.operationFlag == 1) {
+							// Issue a write operation
+							finishCycle = writer.run();
+						}
+						runningList.put(cur.tag, finishCycle);
+					}
+
+				}
+			}
+
+			clockcycle++;
 		}
 	}
-		
+
 	Hashtable<String, ArrayList<TraceItem>> initializeUnits(String inputFile) {
 		// Initialize
 		// processors===============================================================
@@ -113,6 +161,7 @@ public class Simulator {
 		try {
 			FileReader filereader = new FileReader(inputFile);
 			BufferedReader bufferedreader = new BufferedReader(filereader);
+			int tag = 0;
 			while ((line = bufferedreader.readLine()) != null) {
 				String[] ss = line.split(" ");
 				TraceItem item = new TraceItem();
@@ -120,6 +169,8 @@ public class Simulator {
 				item.coreid = ss[1];
 				item.operationFlag = Integer.parseInt(ss[2]);
 				item.address = Util.hexToBinary(ss[3].substring(2));
+				item.tag = tag + "";
+				tag++;
 				boolean ccexist = commands.containsKey(ss[0]);
 				if (ccexist) {
 					commands.get(ss[0]).add(item);
@@ -131,6 +182,22 @@ public class Simulator {
 				// traceList.add(item);
 				System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
 						+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
+				// check if any operations are consecutive
+				Hashtable<String, TraceItem> htlast = new Hashtable<String, TraceItem>();
+				Hashtable<String, TraceItem> htnow = new Hashtable<String, TraceItem>();
+				for (int i = 0; i < commands.size(); i++) {
+					ArrayList<TraceItem> items = commands.get(i);
+					htnow = new Hashtable<String, TraceItem>();
+					for (int j = 0; j < items.size(); j++) {
+						htnow.put(items.get(j).coreid, items.get(j));
+						if (htlast.containsKey(items.get(j).coreid)) {
+							items.get(j).consecutive = true;
+							items.get(j).previous = htlast.get(items.get(j).coreid).tag;
+							items.get(j).error = items.get(j).cycle - htlast.get(items.get(j).coreid).cycle;
+						}
+					}
+					htlast = (Hashtable<String, TraceItem>) htnow.clone();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -143,7 +210,7 @@ public class Simulator {
 	 */
 	public static void main(String[] args) {
 		Util.add(1, 2);
-		
+
 		String inputFile = args[0];
 		int p = Integer.parseInt(args[1]);// The power of processors with a root
 											// of 2
@@ -166,7 +233,7 @@ public class Simulator {
 											// issued)
 		int d1 = Integer.parseInt(args[9]);// The number of cycles caused by a
 											// memory access
-		
+
 		Simulator simulator = new Simulator(inputFile, p, n1, n2, b, a1, a2, C, d, d1);
 	}
 
