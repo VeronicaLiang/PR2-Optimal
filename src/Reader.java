@@ -11,7 +11,7 @@ public class Reader {
 	
 	public int run (String coreid, String address, int cycle) {
 		Processor pro = (Processor) Simulator.processorsTable.get(coreid);
-		boolean l1readHit = Util.hitOrMiss(address, pro, Simulator.n1, Simulator.a1, Simulator.b, "l1");
+		boolean l1readHit = Util.hitOrMiss(address, pro, Simulator.n1, Simulator.a1, Simulator.b);
 		if (l1readHit) {
 			System.out.println(coreid + ": L1 read hit");
 			return cycle+1;
@@ -42,7 +42,7 @@ public class Reader {
 		}
 	}
 	
-	public int exclusive () {
+	public int exclusive (String localid, String homeid, String address) {
 		return 0;
 	}
 }
