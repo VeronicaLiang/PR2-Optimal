@@ -65,14 +65,14 @@ public class Reader {
 		// L get block
 		// store to L1
 		// set state of Block to "shared"
-		Util.storeBlockToCache(add, l, coreid, cur_cycle, pro);
+		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
 		Util.setBlockStatus(Directory.SHARED_STATE);
 		
 		// H change to "shared"
 		// store to L2
 		// add sharer
 		processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
-		Util.storeBlockToCache(add, l, coreid, cur_cycle, pro);
+		cycle = cycle + Util.storeBlockToCache(address, "l2", homeid, cycle);
 		processor.l2.directory.blocktable.get(address).sharers.clear();
 		processor.l2.directory.blocktable.get(address).sharers.add(remoteid);
 		processor.l2.directory.blocktable.get(address).sharers.add(localid);
