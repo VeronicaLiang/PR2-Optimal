@@ -37,7 +37,7 @@ public class Reader {
 			cur_cycle += local2home + 2*home2controller + Simulator.d1;
 			int store_time_l2 = Util.storeBlockToCache(add, "l2", homeid, cur_cycle);
 			cur_cycle += store_time_l2 + local2home;
-			int store_time_l1 = Util.storeBlockToCache(add, "l1", homeid, cur_cycle);
+			int store_time_l1 = Util.storeBlockToCache(add, "l1", coreid, cur_cycle);
 			cur_cycle += store_time_l1;
 		}
 		return cur_cycle;

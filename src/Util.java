@@ -64,9 +64,10 @@ public class Util {
 		return zero_pad + value;
 	}
 
-	public static int storeBlockToCache(String add, String l, String homeid, int cur_cycle) {
+	public static int storeBlockToCache(String add, String l, String coreid, int cur_cycle) {
 		if (l.equals("l1")) {
-			Processor pro = Simulator.processorsTable.get(homeid);
+			Processor pro = Simulator.processorsTable.get(coreid);
+			String homeid = Integer.parseInt(add.substring(19-Simulator.p+1, 20),2) +"";
 			String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
 			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
 			boolean flag = false;
@@ -84,15 +85,17 @@ public class Util {
 				if ((oldest_cycle == -1) || (oldest_cycle > l1set.blockList.get(i).cur_cycle)) {
 					oldest_cycle = l1set.blockList.get(i).cur_cycle;
 					oc_index = i;
+
 				}
 			}
 			if (!flag) {
 				l1set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
 				l1set.blockList.get(oc_index).data = 1;
 				l1set.blockList.get(oc_index).cur_cycle = cur_cycle;
-			}else{
-				return 0;
+
+
 			}
+			return 0;
 		} else if (l.equals("l2")) {
 			// TODO store block to cache
 		}
@@ -103,5 +106,6 @@ public class Util {
 	public static void setBlockStatus(int blockStatus) {
 		// TODO set state of block in node to some state
 	}
+	
 
 }
