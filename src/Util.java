@@ -64,10 +64,9 @@ public class Util {
 		return zero_pad + value;
 	}
 
-	public static int storeBlockToCache(String add, String l, String coreid, int cur_cycle) {
-
+	public static int storeBlockToCache(String add, String l, String homeid, int cur_cycle) {
 		if (l.equals("l1")) {
-			Processor pro = Simulator.processorsTable.get(coreid);
+			Processor pro = Simulator.processorsTable.get(homeid);
 			String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
 			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
 			boolean flag = false;
@@ -77,6 +76,8 @@ public class Util {
 				if (l1set.blockList.get(i).data == 0) {
 					l1set.blockList.get(i).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
 					l1set.blockList.get(i).data = 1;
+					l1set.blockList.get(i).state = Directory.SHARED_STATE;
+					l1set.blockList.get(i).cur_cycle = cur_cycle;
 					flag = true;
 					break;
 				}
@@ -89,6 +90,8 @@ public class Util {
 				l1set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
 				l1set.blockList.get(oc_index).data = 1;
 				l1set.blockList.get(oc_index).cur_cycle = cur_cycle;
+			}else{
+				return 0;
 			}
 		} else if (l.equals("l2")) {
 			// TODO store block to cache
