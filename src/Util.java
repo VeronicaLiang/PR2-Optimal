@@ -53,5 +53,35 @@ public class Util {
 		return zero_pad + value;
 	}
 
+	public static void storeBlockToCache(String add, String l, String coreid, int n, int a, int b, int cur_cycle, Processor pro) {
+
+		if(l.equals("l1")){
+			String setloc = add.substring(32-n+a+1, 31-b+1);
+			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc,2));
+			boolean flag = false;
+			int oldest_cycle = -1;
+			int oc_index = -1;
+			for(int i=0; i<l1set.blockList.size(); i++){
+				if (l1set.blockList.get(i).data == 0){
+					l1set.blockList.get(i).tag = add.substring(0,31-n+a+1);
+					l1set.blockList.get(i).data = 1;
+					flag = true;
+					break;
+				}
+				if((oldest_cycle == -1)||(oldest_cycle > l1set.blockList.get(i).cur_cycle)){
+					oldest_cycle = l1set.blockList.get(i).cur_cycle;
+					oc_index = i;
+				}
+			}
+			if(!flag){
+				l1set.blockList.get(oc_index).tag = add.substring(0,31-n+a+1);
+				l1set.blockList.get(oc_index).data = 1;
+				l1set.blockList.get(oc_index).cur_cycle=cur_cycle;
+			}
+		}else if (l.equals("l2")) {
+			// TODO store block to cache
+		}
+	}
+
 
 }

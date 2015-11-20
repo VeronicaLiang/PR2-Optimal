@@ -11,5 +11,5 @@ public class Block {
 	 * MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
 	 */
 	int state;
-	
+	int cur_cycle;
 }
