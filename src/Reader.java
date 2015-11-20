@@ -27,7 +27,11 @@ public class Reader {
 
 		Processor pro = Simulator.processorsTable.get(homeid);
 		if(pro.l2.directory.blocktable.contains(add)){
-
+			if(pro.l2.directory.blocktable.get(add).state == Directory.SHARED_STATE){
+				cur_cycle = shared(coreid, homeid, add, cur_cycle);
+			}else if (pro.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE){
+				cur_cycle = exclusive(coreid, homeid, add, cur_cycle);
+			}
 		}else{
 			int local2home = Util.getManhattanDistance(coreid,homeid, Simulator.p);
 			int home2controller = Util.getManhattanDistance(homeid, "0", Simulator.p);

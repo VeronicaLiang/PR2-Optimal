@@ -85,6 +85,7 @@ public class Util {
 				if ((oldest_cycle == -1) || (oldest_cycle > l1set.blockList.get(i).cur_cycle)) {
 					oldest_cycle = l1set.blockList.get(i).cur_cycle;
 					oc_index = i;
+					Processor homepor = Simulator.processorsTable.get(homeid);
 
 				}
 			}
