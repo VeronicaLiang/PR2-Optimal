@@ -1,3 +1,4 @@
+import java.math.BigInteger;
 
 public class Util {
 	public static int add (int a, int b) {
@@ -43,4 +44,14 @@ public class Util {
 
 		return false;
 	}
+
+	public static String hexToBinary(String hex) {
+		String value = new BigInteger(hex, 16).toString(2);
+		String zero_pad = "0";
+		for (int i = 1; i < 32 - value.length(); i++)
+			zero_pad = zero_pad + "0";
+		return zero_pad + value;
+	}
+
+
 }
