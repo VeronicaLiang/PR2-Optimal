@@ -24,11 +24,12 @@ public class Reader {
 	public int readMiss(String add, String coreid, int cur_cycle){
 		int cycle_used = 0;
 		String homeid = Integer.parseInt(add.substring(19-Simulator.p+1, 20),2) +"";
-		int local2home = Util.getManhattanDistance(coreid,homeid, Simulator.p);
+
 		Processor pro = Simulator.processorsTable.get(homeid);
 		if(pro.l2.directory.blocktable.contains(add)){
 
 		}else{
+			int local2home = Util.getManhattanDistance(coreid,homeid, Simulator.p);
 			int home2controller = Util.getManhattanDistance(homeid, "0", Simulator.p);
 			System.out.println(coreid + ": L2 uncached, need to send message to controller" +
 					" and fetch data from memory");
