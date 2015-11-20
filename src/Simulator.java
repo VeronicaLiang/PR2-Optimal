@@ -53,16 +53,7 @@ public class Simulator {
 	public static ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
 	public static Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
 
-	public Simulator(String inputFile, int p, int n1, int n2, int b, int a1, int a2, int C, int d, int d1) {
-		this.p = p;
-		this.n1 = n1;
-		this.n2 = n2;
-		this.b = b;
-		this.a1 = a1;
-		this.a2 = a2;
-		this.C = C;
-		this.d = d;
-		this.d1 = d1;
+	public Simulator(String inputFile) {
 		Hashtable<String, ArrayList<TraceItem>> commands = initializeUnits(inputFile);
 		int clockcycle = 1;
 		boolean finish = false;
@@ -72,39 +63,17 @@ public class Simulator {
 		int lastCycle = 0;
 		while (!finish) {
 			// extract all commands need to operate in this clock cycle
-			ArrayList<TraceItem> instructions = new ArrayList<TraceItem>();
-			instructions = commands.get(String.valueOf(clockcycle));
-			for (int i = 0; i < instructions.size(); i++) {
-				TraceItem cur = instructions.get(i);
-				if (cur.consecutive) {
-					// if this trace is consecutive, then add to waiting list
-					waitingList.add(cur);
-				} else {
-					Processor processor = (Processor) processorsTable.get(cur.coreid);
-					String address = cur.address;
-					if (cur.operationFlag == 0) {
-						// Issue a read operation
-						finishCycle = reader.run();
-					} else if (cur.operationFlag == 1) {
-						// Issue a write operation
-						finishCycle = writer.run();
-					}
-					if (lastCycle < finishCycle) {
-						lastCycle = finishCycle;
-					}
-					runningList.put(cur.tag, finishCycle);
-				}
-			}
-			for (int i = 0; i < waitingList.size(); i++) {
-				TraceItem cur = waitingList.get(i);
-				if (runningList.get(cur.tag) <= clockcycle && !cur.issued) {
-					if (cur.error > 0) {
-						cur.error = cur.error - 1;
+			if(commands.containsKey(clockcycle)){
+				ArrayList<TraceItem> instructions = new ArrayList<TraceItem>();
+				instructions = commands.get(String.valueOf(clockcycle));
+				for (int i = 0; i < instructions.size(); i++) {
+					TraceItem cur = instructions.get(i);
+					if (cur.consecutive) {
+						// if this trace is consecutive, then add to waiting list
+						waitingList.add(cur);
 					} else {
-						cur.issued = true;
 						Processor processor = (Processor) processorsTable.get(cur.coreid);
 						String address = cur.address;
-						runningList.put(cur.tag, 0);
 						if (cur.operationFlag == 0) {
 							// Issue a read operation
 							finishCycle = reader.run();
@@ -117,12 +86,49 @@ public class Simulator {
 						}
 						runningList.put(cur.tag, finishCycle);
 					}
+				}
+				for (int i = 0; i < waitingList.size(); i++) {
+					TraceItem cur = waitingList.get(i);
+					if (runningList.get(cur.tag) <= clockcycle && !cur.issued) {
+						if (cur.error > 0) {
+							cur.error = cur.error - 1;
+						} else {
+							cur.issued = true;
+							Processor processor = (Processor) processorsTable.get(cur.coreid);
+							String address = cur.address;
+							runningList.put(cur.tag, 0);
+							if (cur.operationFlag == 0) {
+								// Issue a read operation
+								finishCycle = reader.run();
+							} else if (cur.operationFlag == 1) {
+								// Issue a write operation
+								finishCycle = writer.run();
+							}
+							if (lastCycle < finishCycle) {
+								lastCycle = finishCycle;
+							}
+							runningList.put(cur.tag, finishCycle);
+						}
 
+					}
+				}
+				commands.remove(String.valueOf(clockcycle));
+			}
+			
+			
+			clockcycle++;
+			if (commands.size() == 0) {
+				finish = true;
+				for (int i = 0; i < waitingList.size(); i++) {
+					if (!waitingList.get(i).issued) {
+						finish = false;
+						break;
+					}
 				}
 			}
-			clockcycle++;
+			
 		}
-		
+
 		Util.printOutputList(outputList, lastCycle);
 	}
 
@@ -154,7 +160,7 @@ public class Simulator {
 		// int numberOfSetInL2 = numberOfBlocksInL2/associativityOfL2;
 		int numberOfSetInL2 = (int) Math.pow(base, (n2 - a2 - b));
 
-		int processorsNumber = (int) Math.pow(base, this.p);
+		int processorsNumber = (int) Math.pow(base, Simulator.p);
 		for (int i = 0; i < processorsNumber; i++) {
 			Processor processor = new Processor(numberOfSetInL1, numberOfSetInL2, associativityOfL1, a2);
 			processorsTable.put(i + "", processor);
@@ -190,10 +196,13 @@ public class Simulator {
 				// traceList.add(item);
 				System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
 						+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
-				// check if any operations are consecutive
-				Hashtable<String, TraceItem> htlast = new Hashtable<String, TraceItem>();
-				Hashtable<String, TraceItem> htnow = new Hashtable<String, TraceItem>();
-				for (int i = 0; i < commands.size(); i++) {
+				
+			}
+			// check if any operations are consecutive
+			Hashtable<String, TraceItem> htlast = new Hashtable<String, TraceItem>();
+			Hashtable<String, TraceItem> htnow = new Hashtable<String, TraceItem>();
+			for (int i = 0; i < commands.size(); i++) {
+				if(commands.containsKey(i)) {
 					ArrayList<TraceItem> items = commands.get(i);
 					htnow = new Hashtable<String, TraceItem>();
 					for (int j = 0; j < items.size(); j++) {
@@ -217,32 +226,62 @@ public class Simulator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Util.add(1, 2);
 
-		String inputFile = args[0];
-		int p = Integer.parseInt(args[1]);// The power of processors with a root
-											// of 2
-		int n1 = Integer.parseInt(args[2]);// The power of the size of every l1
-											// with a root of 2
-		int n2 = Integer.parseInt(args[3]);// The power of the size of every l2
-											// with a root of 2
-		int b = Integer.parseInt(args[4]);// The size of a block
-		int a1 = Integer.parseInt(args[5]);// The power of the associativity of
-											// l1 with a root of 2
-		int a2 = Integer.parseInt(args[6]);// The power of the associativity of
-											// l2 with a root of 2
-		int C = Integer.parseInt(args[7]);// The number of delay cycles caused
-											// by communicating between two
-											// nodes(a node consists of a
-											// processor and l1 cache)
-		int d = Integer.parseInt(args[8]);// The number of cycles caused by a l2
-											// hit(The l1 hit is satisfied in
-											// the same cycle in which it is
-											// issued)
-		int d1 = Integer.parseInt(args[9]);// The number of cycles caused by a
-											// memory access
+		boolean test = true;
+		String inputFile = "";
+		if (test) {
+			inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
+			Simulator.p = 4;// The power of processors with a root of 2
+			Simulator.n1 = 14;// The power of the size of every l1 with a root
+								// of 2
+			Simulator.n2 = 19;// The power of the size of every l2 with a root
+								// of 2
+			Simulator.b = 6;// The size of a block
+			Simulator.a1 = 2;// The power of the associativity of l1 with a root
+								// of 2
+			Simulator.a2 = 2;// The power of the associativity of l2 with a root
+								// of 2
+			Simulator.C = 3;// The number of delay cycles caused by
+							// communicating between two nodes(a node consists
+							// of a processor and l1 cache)
+			Simulator.d = 3;// The number of cycles caused by a l2 hit(The l1
+							// hit is satisfied in the same cycle in which it is
+							// issued)
+			Simulator.d1 = 100;// The number of cycles caused by a memory access
+		} else {
+			inputFile = args[0];
+			Simulator.p = Integer.parseInt(args[1]);// The power of processors
+													// with a root
+			// of 2
+			Simulator.n1 = Integer.parseInt(args[2]);// The power of the size of
+														// every l1
+			// with a root of 2
+			Simulator.n2 = Integer.parseInt(args[3]);// The power of the size of
+														// every l2
+			// with a root of 2
+			Simulator.b = Integer.parseInt(args[4]);// The size of a block
+			Simulator.a1 = Integer.parseInt(args[5]);// The power of the
+														// associativity of
+			// l1 with a root of 2
+			Simulator.a2 = Integer.parseInt(args[6]);// The power of the
+														// associativity of
+			// l2 with a root of 2
+			Simulator.C = Integer.parseInt(args[7]);// The number of delay
+													// cycles caused
+			// by communicating between two
+			// nodes(a node consists of a
+			// processor and l1 cache)
+			Simulator.d = Integer.parseInt(args[8]);// The number of cycles
+													// caused by a l2
+			// hit(The l1 hit is satisfied in
+			// the same cycle in which it is
+			// issued)
+			Simulator.d1 = Integer.parseInt(args[9]);// The number of cycles
+														// caused by a
+			// memory access
+		}
 
-		new Simulator(inputFile, p, n1, n2, b, a1, a2, C, d, d1);
+		new Simulator(inputFile);
 	}
 
 }
