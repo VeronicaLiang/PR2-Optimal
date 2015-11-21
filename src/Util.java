@@ -117,7 +117,7 @@ public class Util {
 			OwnerAndSharers tmp = new OwnerAndSharers();
 			tmp.homeNode = homeid;
 			homepro.l2.directory.blocktable.put(add,tmp);
-			String setlocl2 = add.substring(32 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b + 1);
+			String setlocl2 = add.substring(31 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b + 1);
 			Set l2set = homepro.l1.setsList.get(Integer.parseInt(setlocl2, 2));
 			int oldest_cycle = -1;
 			int oc_index = -1;
