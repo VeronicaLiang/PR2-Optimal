@@ -16,8 +16,7 @@ public class Reader {
 			System.out.println(coreid + ": L1 read hit");
 			return cycle+1;
 		} else {
-			int cycle_needed = readMiss(address, coreid, cycle);
-			return cycle+cycle_needed;
+			return readMiss(address, coreid, cycle);
 		}
 	}
 
@@ -27,7 +26,11 @@ public class Reader {
 
 		Processor pro = Simulator.processorsTable.get(homeid);
 		if(pro.l2.directory.blocktable.contains(add)){
-
+			if(pro.l2.directory.blocktable.get(add).state == Directory.SHARED_STATE){
+				cur_cycle = shared(coreid, homeid, add, cur_cycle);
+			}else if (pro.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE) {
+				cur_cycle = exclusive(coreid, homeid, add, cur_cycle);
+			}
 		}else{
 			int local2home = Util.getManhattanDistance(coreid,homeid, Simulator.p);
 			int home2controller = Util.getManhattanDistance(homeid, "0", Simulator.p);
@@ -37,10 +40,32 @@ public class Reader {
 			cur_cycle += local2home + 2*home2controller + Simulator.d1;
 			int store_time_l2 = Util.storeBlockToCache(add, "l2", homeid, cur_cycle);
 			cur_cycle += store_time_l2 + local2home;
-			int store_time_l1 = Util.storeBlockToCache(add, "l1", homeid, cur_cycle);
+			int store_time_l1 = Util.storeBlockToCache(add, "l1", coreid, cur_cycle);
 			cur_cycle += store_time_l1;
 		}
 		return cur_cycle;
+	}
+	
+	public int shared (String localid, String homeid, String address, int cycle) {
+		Processor processor = Simulator.processorsTable.get(homeid);
+		
+		// 1. L sends request to H
+		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
+		cycle = manhattanDistance * Simulator.C + cycle;
+		
+		// 2. H return block to L
+		// add sharer L
+		cycle = manhattanDistance * Simulator.C + Simulator.d + cycle;
+		processor.l2.directory.blocktable.get(address).sharers.add(localid);
+		
+		
+		// L get data
+		// store to l1
+		// set state of block to "shared"
+		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
+		Util.setBlockStatus(Directory.SHARED_STATE);
+		
+		return cycle;
 	}
 	
 	public int exclusive (String localid, String homeid, String address, int cycle) {

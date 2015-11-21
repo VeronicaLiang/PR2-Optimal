@@ -64,9 +64,10 @@ public class Util {
 		return zero_pad + value;
 	}
 
-	public static int storeBlockToCache(String add, String l, String homeid, int cur_cycle) {
+	public static int storeBlockToCache(String add, String l, String coreid, int cur_cycle) {
 		if (l.equals("l1")) {
-			Processor pro = Simulator.processorsTable.get(homeid);
+			Processor pro = Simulator.processorsTable.get(coreid);
+			String homeid = Integer.parseInt(add.substring(19-Simulator.p+1, 20),2) +"";
 			String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
 			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
 			boolean flag = false;
@@ -87,12 +88,28 @@ public class Util {
 				}
 			}
 			if (!flag) {
+				// replace l1 block
 				l1set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
 				l1set.blockList.get(oc_index).data = 1;
 				l1set.blockList.get(oc_index).cur_cycle = cur_cycle;
-			}else{
-				return 0;
+				Processor homepro = Simulator.processorsTable.get(homeid);
+				if (pro.l2.directory.blocktable.get(add).state == Directory.SHARED_STATE){
+					pro.l2.directory.blocktable.get(add).sharers.remove(coreid);
+				}else{
+					String l2setloc =  add.substring(31-Simulator.n2+Simulator.a2+1,31-Simulator.b+1);
+					Set l2set = homepro.l2.setsList.get(Integer.parseInt(l2setloc,2));
+					String l2blocktag = add.substring(0,31-Simulator.n2+Simulator.a2+1);
+					for (int j=0; j<l2set.blockList.size(); j++) {
+						Block check = l2set.blockList.get(j);
+						if (check.tag.equals(l2blocktag)) {
+							check.cur_cycle = cur_cycle + Util.getManhattanDistance(coreid, homeid, Simulator.p);
+						}
+					}
+				}
+				pro.l2.directory.blocktable.get(add).state = Directory.SHARED_STATE;
+				pro.l2.directory.blocktable.get(add).sharers.remove(coreid);
 			}
+			return 0;
 		} else if (l.equals("l2")) {
 			// TODO store block to cache
 		}
@@ -103,5 +120,6 @@ public class Util {
 	public static void setBlockStatus(int blockStatus) {
 		// TODO set state of block in node to some state
 	}
+	
 
 }
