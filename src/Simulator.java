@@ -159,7 +159,7 @@ public class Simulator {
 
 		int processorsNumber = (int) Math.pow(base, Simulator.p);
 		for (int i = 0; i < processorsNumber; i++) {
-			Processor processor = new Processor(numberOfSetInL1, numberOfSetInL2, associativityOfL1, a2);
+			Processor processor = new Processor(numberOfSetInL1, numberOfSetInL2, associativityOfL1, associativityOfL2);
 			processorsTable.put(i + "", processor);
 		}
 
