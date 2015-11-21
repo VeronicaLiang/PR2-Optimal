@@ -25,7 +25,7 @@ public class Util {
 		int home_x = Integer.parseInt(homecoreid) / edge;
 		int home_y = Integer.parseInt(homecoreid) % edge;
 
-		int dist = Math.abs(core_x - core_y) + Math.abs(home_x - home_y);
+		int dist = Math.abs(core_x - home_x) + Math.abs(core_y - home_y);
 
 		return dist;
 	}
