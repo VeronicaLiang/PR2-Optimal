@@ -199,6 +199,24 @@ public class Util {
 	}
 	
 	public static void updateLRU (String address, String coreid, String l, int cycle) {
+		Processor pro = Simulator.processorsTable.get(coreid);
+		if (l.equals("l1")) {
+			String setloc = address.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
+			String tag = address.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
+			for (int i = 0; i < pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.size(); i++){
+				if(pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).tag.equals(tag)){
+					pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).cur_cycle=cycle;
+				}
+			}
+		} else if (l.equals("l2")) {
+			String setlocl2 = address.substring(32 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b + 1);
+			String tag = address.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
+			for (int i = 0; i < pro.l2.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.size(); i++){
+				if(pro.l1.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).tag.equals(tag)){
+					pro.l1.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).cur_cycle=cycle;
+				}
+			}
+		}
 		
 	}
 
