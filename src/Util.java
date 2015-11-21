@@ -194,7 +194,7 @@ public class Util {
 		}
 	}
 	
-	public static void updateLRU (String address, String coreid, int cycle) {
+	public static void updateLRU (String address, String coreid, String l, int cycle) {
 		
 	}
 
