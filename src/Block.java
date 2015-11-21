@@ -1,10 +1,9 @@
-import java.util.ArrayList;
 
 /*
  * Block entity
  */
 public class Block {
-	String tag;
+	String tag = "";
 	// use 0 indicates there is no data cached
 	int data = 0;
 	/*
