@@ -31,7 +31,7 @@ public class Writer {
 				System.out.println(key);
 			}
 			System.out.println("************");
-			if (homeProcessor.l2.directory.blocktable.contains(add)) {
+			if (homeProcessor.l2.directory.blocktable.containsKey(add)) {
 				// write miss, l2 hit
 				if (homeProcessor.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE) {
 					// write miss, l2 exclusive

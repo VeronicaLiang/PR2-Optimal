@@ -25,7 +25,7 @@ public class Reader {
 		String homeid = Integer.parseInt(add.substring(19 - Simulator.p + 1, 20), 2) + "";
 		Processor pro = Simulator.processorsTable.get(homeid);
 
-		if (pro.l2.directory.blocktable.contains(add)) {
+		if (pro.l2.directory.blocktable.containsKey(add)) {
 			// read miss, l2 hit, check state of block
 			if (pro.l2.directory.blocktable.get(add).state == Directory.SHARED_STATE) {
 				// read miss, l2 shared
