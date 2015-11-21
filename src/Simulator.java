@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.IntSummaryStatistics;
 
 /*
  * The simulator is trace driven. That is memory load and store operations will specified in an
@@ -54,7 +55,7 @@ public class Simulator {
 	public static Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
 
 	public Simulator(String inputFile) {
-		Hashtable<String, ArrayList<TraceItem>> commands = initializeUnits(inputFile);
+		Hashtable<Integer, ArrayList<TraceItem>> commands = initializeUnits(inputFile);
 		int clockcycle = 1;
 		boolean finish = false;
 		Reader reader = new Reader();
@@ -65,7 +66,7 @@ public class Simulator {
 			// extract all commands need to operate in this clock cycle
 			if(commands.containsKey(clockcycle)){
 				ArrayList<TraceItem> instructions = new ArrayList<TraceItem>();
-				instructions = commands.get(String.valueOf(clockcycle));
+				instructions = commands.get(clockcycle);
 				for (int i = 0; i < instructions.size(); i++) {
 					TraceItem cur = instructions.get(i);
 					if (cur.consecutive) {
@@ -128,7 +129,7 @@ public class Simulator {
 		Util.printOutputList(outputList, lastCycle);
 	}
 
-	Hashtable<String, ArrayList<TraceItem>> initializeUnits(String inputFile) {
+	Hashtable<Integer, ArrayList<TraceItem>> initializeUnits(String inputFile) {
 		// Initialize
 		// processors===============================================================
 		int base = 2;
@@ -167,7 +168,7 @@ public class Simulator {
 		// Use a hashtable to record all commands from the trace file. The key
 		// is the clock cycle, so that in each cycle
 		// the commands that need to operate can be easily extracted.
-		Hashtable<String, ArrayList<TraceItem>> commands = new Hashtable<String, ArrayList<TraceItem>>();
+		Hashtable<Integer, ArrayList<TraceItem>> commands = new Hashtable<Integer, ArrayList<TraceItem>>();
 		try {
 			FileReader filereader = new FileReader(inputFile);
 			BufferedReader bufferedreader = new BufferedReader(filereader);
@@ -181,13 +182,13 @@ public class Simulator {
 				item.address = Util.hexToBinary(ss[3].substring(2));
 				item.tag = tag + "";
 				tag++;
-				boolean ccexist = commands.containsKey(ss[0]);
+				boolean ccexist = commands.containsKey(Integer.parseInt(ss[0]));
 				if (ccexist) {
-					commands.get(ss[0]).add(item);
+					commands.get(Integer.parseInt(ss[0])).add(item);
 				} else {
 					ArrayList<TraceItem> tmp = new ArrayList<TraceItem>();
 					tmp.add(item);
-					commands.put(ss[0], tmp);
+					commands.put(Integer.parseInt(ss[0]), tmp);
 				}
 				// traceList.add(item);
 				System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
@@ -226,7 +227,7 @@ public class Simulator {
 		boolean test = true;
 		String inputFile = "";
 		if (test) {
-			inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
+			inputFile = "tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
 			Simulator.n1 = 14;// The power of the size of every l1 with a root
 								// of 2
