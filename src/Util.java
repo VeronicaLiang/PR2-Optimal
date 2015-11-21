@@ -126,6 +126,7 @@ public class Util {
 					l2set.blockList.get(i).tag = add.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
 					l2set.blockList.get(i).data = 1;
 					l2set.blockList.get(i).state = Directory.SHARED_STATE;
+					l2set.blockList.get(i).address = add;
 					l2set.blockList.get(i).cur_cycle = cur_cycle;
 					return 0;
 				}
