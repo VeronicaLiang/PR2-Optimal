@@ -33,7 +33,7 @@ public class Writer {
 				}
 			}
 			//L to R
-			Util.setBlockStatus(1);//TODO set the block's state to exclusive in local l1
+			Util.setBlockStatus(coreid,add,1);// set the block's state to exclusive in local l1
 			cycles = cycles+longestLatency * Simulator.C;
 			
 			longestLatency = 0;
@@ -44,8 +44,8 @@ public class Writer {
 				}
 				String rn = homeProcessor.l2.directory.blocktable.get(add).sharers.get(i);
 				Processor romteProcessor = Simulator.processorsTable.get(rn);
-				//romteProcessor.l1 set remote blocks' state to invalid
-				Util.setBlockStatus(1);//TODO
+				// set remote blocks' state to invalid
+				Util.setBlockStatus(rn,add,1);
 			}
 			// Rs send ack to L
 			cycles = cycles+longestLatency * Simulator.C;
@@ -68,16 +68,16 @@ public class Writer {
 					
 					//store the block 
 					Util.storeBlockToCache(add,"l2",homeid,cycles);
-					//change the block's state to exclusive
-					Util.setBlockStatus(1);//TODO 
+					//change the block's state to exclusive in home node
+					homeProcessor.l2.directory.blocktable.get(add).state = 1; 
 					//set the block's owner
 					homeProcessor.l2.directory.blocktable.get(add).owner = coreid;
 					//H to L
 					cycles = cycles+manhattanDistance * Simulator.C;
 					//store the block in local l1
 					Util.storeBlockToCache(add,"l1",coreid,cycles);
-					//set the block's state to exclusive
-					Util.setBlockStatus(1);//TODO 
+					//set the block's state to exclusive in local l1
+					Util.setBlockStatus(coreid,add,1); 
 				}else if(homeProcessor.l2.directory.blocktable.get(add).state == 1){
 					//L to H
 					cycles = cycles+manhattanDistance * Simulator.C;
@@ -90,7 +90,8 @@ public class Writer {
 					cycles = cycles+latency * Simulator.C;
 					
 					//set the block's state to invalid in the remote l1
-					Util.setBlockStatus(1);//TODO
+					Util.setBlockStatus(homeProcessor.l2.directory.blocktable.get(add).owner,add,1);
+					
 					//send block to L, and send alert to H
 					int rToHLatency = Util.getManhattanDistance(homeid,homeProcessor.l2.directory.blocktable.get(add).owner, Simulator.p);
 					
@@ -101,7 +102,7 @@ public class Writer {
 					}
 					//store the block in local l1 and set the block's state to exclusive
 					Util.storeBlockToCache(add,"l1",coreid,cycles);
-					Util.setBlockStatus(1);//TODO
+					Util.setBlockStatus(coreid,add,1);
 					
 					//change the owner of the block in H to L
 					homeProcessor.l2.directory.blocktable.get(add).owner = coreid;
@@ -124,8 +125,9 @@ public class Writer {
 							longestLatency = latency;
 						}
 					}
+					// set the block's state to exclusive in local l1
+					Util.setBlockStatus(coreid,add,1);
 					
-					Util.setBlockStatus(1);//TODO set the block's state to exclusive in local l1
 					//store the block in local l1
 					Util.storeBlockToCache(add,"l1",coreid,cycles);
 					//L to R
@@ -139,8 +141,8 @@ public class Writer {
 						}
 						String rn = homeProcessor.l2.directory.blocktable.get(add).sharers.get(i);
 						Processor romteProcessor = Simulator.processorsTable.get(rn);
-						//romteProcessor.l1 set remote blocks' state to invalid
-						Util.setBlockStatus(1);//TODO
+						//set remote blocks' state to invalid in l1
+						Util.setBlockStatus(rn,add,0);
 					}
 					// Rs send ack to L
 					cycles = cycles+longestLatency * Simulator.C;

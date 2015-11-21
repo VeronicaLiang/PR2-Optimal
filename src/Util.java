@@ -117,8 +117,17 @@ public class Util {
 		return 0;
 	}
 	
-	public static void setBlockStatus(int blockStatus) {
-		// TODO set state of block in node to some state
+	public static void setBlockStatus(String coreid, String add,int blockStatus) {
+		// set state of block in node to some state
+		Processor pro = Simulator.processorsTable.get(coreid);
+		String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
+		//Set l1set = ;
+		String tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
+		for (int i = 0; i < pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.size(); i++){
+			if(pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).tag.equals(tag)){
+				pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).state = blockStatus;
+			}
+		}
 	}
 	
 
