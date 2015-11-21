@@ -1,3 +1,5 @@
+import java.util.Enumeration;
+import java.util.Set;
 
 public class Writer {
 	public Writer() {
@@ -22,7 +24,13 @@ public class Writer {
 				return share(coreid, homeid, add, cycle, hit);
 			}
 		} else {
-
+			System.out.println("***********");
+			System.out.println(add);
+			Set<String> keys = homeProcessor.l2.directory.blocktable.keySet();
+			for(String key: keys){
+				System.out.println(key);
+			}
+			System.out.println("************");
 			if (homeProcessor.l2.directory.blocktable.contains(add)) {
 				// write miss, l2 hit
 				if (homeProcessor.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE) {

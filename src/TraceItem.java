@@ -9,5 +9,6 @@ public class TraceItem {
 	String previous = "";
 	int error= 0;
 	boolean issued = false;
+	String origin;
 
 }

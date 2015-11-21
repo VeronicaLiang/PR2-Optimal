@@ -180,7 +180,13 @@ public class Simulator {
 				}
 				item.coreid = ss[1];
 				item.operationFlag = Integer.parseInt(ss[2]);
-				item.address = Util.hexToBinary(ss[3].substring(2));
+//				item.address = Util.hexToBinary(ss[3].substring(2));
+				item.origin = Util.hexToBinary(ss[3].substring(2));
+				String pad = "";
+				for (int k=0; k<b; k++){
+					pad += "0";
+				}
+				item.address = item.origin.substring(0,31-b+1) + pad;
 				item.tag = tag + "";
 				tag++;
 				boolean ccexist = commands.containsKey(Integer.parseInt(ss[0]));
