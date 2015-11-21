@@ -5,14 +5,12 @@ import java.util.HashMap;
 public class Util {
 
 
-	public static void printOutputList(HashMap<Integer, ArrayList<String>> outputList, int last) {
+	public static void printOutputList(HashMap<Integer, ArrayList<String>> outputList, int cycle) {
 		ArrayList<String> strList = new ArrayList<String>();
-		for (int i = 0; i < last + 5; i++) {
-			if (outputList.containsKey(i)){
-				strList = outputList.get(i);
-				for (int j = 0; j < strList.size(); j++) {
-					System.out.println("Cycle " + i + " --> " + strList.get(j));
-				}
+		if (outputList.containsKey(cycle)){
+			strList = outputList.get(cycle);
+			for (int j = 0; j < strList.size(); j++) {
+				System.out.println("Cycle " + cycle + " --> " + strList.get(j));
 			}
 		}
 	}
