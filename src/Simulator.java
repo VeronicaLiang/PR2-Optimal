@@ -119,6 +119,12 @@ public class Simulator {
 			clockcycle++;
 			if (clockcycle > lastCycle) {
 				finish = true;
+				for (int i = 0; i < waitingList.size(); i++) {
+					if (!waitingList.get(i).issued){
+						finish = false;
+						break;
+					}
+				}
 			}
 			
 		}
@@ -234,7 +240,7 @@ public class Simulator {
 		boolean test = true;
 		String inputFile = "";
 		if (test) {
-			inputFile = "tracefile";
+			inputFile = "tracefile-1.txt";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
 			Simulator.n1 = 14;// The power of the size of every l1 with a root
