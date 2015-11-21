@@ -115,7 +115,7 @@ public class Simulator {
 				}
 				
 			}
-			
+			Util.printOutputList(outputList, clockcycle);
 			clockcycle++;
 			if (clockcycle > lastCycle) {
 				finish = true;
@@ -129,7 +129,7 @@ public class Simulator {
 			
 		}
 
-		Util.printOutputList(outputList, lastCycle);
+		
 	}
 
 	Hashtable<Integer, ArrayList<TraceItem>> initializeUnits(String inputFile) {
