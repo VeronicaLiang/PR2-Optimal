@@ -8,9 +8,11 @@ public class Util {
 	public static void printOutputList(HashMap<Integer, ArrayList<String>> outputList, int last) {
 		ArrayList<String> strList = new ArrayList<String>();
 		for (int i = 0; i < last + 5; i++) {
-			strList = outputList.get(i);
-			for (int j = 0; j < strList.size(); j++) {
-				System.out.println(strList.get(j));
+			if (outputList.containsKey(i)){
+				strList = outputList.get(i);
+				for (int j = 0; j < strList.size(); j++) {
+					System.out.println(strList.get(j));
+				}
 			}
 		}
 	}

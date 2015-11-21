@@ -87,28 +87,31 @@ public class Simulator {
 				}
 				for (int i = 0; i < waitingList.size(); i++) {
 					TraceItem cur = waitingList.get(i);
-					if (runningList.get(cur.tag) <= clockcycle && !cur.issued) {
-						if (cur.error > 0) {
-							cur.error = cur.error - 1;
-						} else {
-							cur.issued = true;
-							runningList.put(cur.tag, 0);
-							if (cur.operationFlag == 0) {
-								// Issue a read operation
-								finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
-							} else if (cur.operationFlag == 1) {
-								// Issue a write operation
-								finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
+					if (runningList.containsKey(cur.tag)){
+						if (runningList.get(cur.tag) <= clockcycle && !cur.issued) {
+							if (cur.error > 0) {
+								cur.error = cur.error - 1;
+							} else {
+								cur.issued = true;
+								runningList.put(cur.tag, 0);
+								if (cur.operationFlag == 0) {
+									// Issue a read operation
+									finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
+								} else if (cur.operationFlag == 1) {
+									// Issue a write operation
+									finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
+								}
+								if (lastCycle < finishCycle) {
+									lastCycle = finishCycle;
+								}
+								runningList.put(cur.tag, finishCycle);
 							}
-							if (lastCycle < finishCycle) {
-								lastCycle = finishCycle;
-							}
-							runningList.put(cur.tag, finishCycle);
-						}
 
+						}
 					}
+					
 				}
-				commands.remove(String.valueOf(clockcycle));
+				commands.remove(clockcycle);
 			}
 			
 			
