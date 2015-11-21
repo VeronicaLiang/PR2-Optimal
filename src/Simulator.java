@@ -77,7 +77,7 @@ public class Simulator {
 							finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
 						} else if (cur.operationFlag == 1) {
 							// Issue a write operation
-							finishCycle = writer.run();
+							finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
 						}
 						if (lastCycle < finishCycle) {
 							lastCycle = finishCycle;
@@ -98,7 +98,7 @@ public class Simulator {
 								finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
 							} else if (cur.operationFlag == 1) {
 								// Issue a write operation
-								finishCycle = writer.run();
+								finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
 							}
 							if (lastCycle < finishCycle) {
 								lastCycle = finishCycle;

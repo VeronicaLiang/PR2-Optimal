@@ -63,7 +63,7 @@ public class Reader {
 		// store to l1
 		// set state of block to "shared"
 		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
-		Util.setBlockStatus(Directory.SHARED_STATE);
+		Util.setBlockStatus(localid, address, Directory.SHARED_STATE);
 		
 		return cycle;
 	}
@@ -85,14 +85,14 @@ public class Reader {
 		
 		// 4. R sends block to L and H
 		// set state of block to "shared"
-		Util.setBlockStatus(Directory.SHARED_STATE);
+		Util.setBlockStatus(remoteid, address, Directory.SHARED_STATE);
 		cycle = cycle + Math.max(Util.getManhattanDistance(localid, remoteid, Simulator.p), Util.getManhattanDistance(localid, remoteid, Simulator.p))*Simulator.C;
 		
 		// L get block
 		// store to L1
 		// set state of Block to "shared"
 		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
-		Util.setBlockStatus(Directory.SHARED_STATE);
+		Util.setBlockStatus(localid, address, Directory.SHARED_STATE);
 		
 		// H change to "shared"
 		// store to L2
