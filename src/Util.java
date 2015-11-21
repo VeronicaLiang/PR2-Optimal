@@ -194,6 +194,10 @@ public class Util {
 		}
 	}
 	
+	public static int getBlockStatus(String coreid, String address) {
+		return 0;
+	}
+	
 	public static void updateLRU (String address, String coreid, String l, int cycle) {
 		
 	}

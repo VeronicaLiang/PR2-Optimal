@@ -156,8 +156,8 @@ public class Writer {
 		return cycles;
 	}
 	
-	public int hitExclusive(String localid, String homeid, String address, int cycle) {
-		
+	public int hitExclusive(String localid, String address, int cycle) {
+		Util.updateLRU (address, localid, "l1", cycle); 
 		return cycle;
 	}
 	
