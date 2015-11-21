@@ -62,7 +62,7 @@ public class Writer {
 		// 1. L sends request to H
 		String str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
 		Util.addOutput(cycle, str);
-		cycle = cycle + local2home * Simulator.C;
+		cycle = cycle + local2home * Simulator.C + Simulator.d;
 
 		// 2. H sends request to 0
 		str = homeid + ": gets request from L:" + localid +", L2 write miss, sends request to Memory Controller:0. This is a small message.";
@@ -108,7 +108,7 @@ public class Writer {
 		String str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
 		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
-		cycle = manhattanDistance * Simulator.C + cycle;
+		cycle = manhattanDistance * Simulator.C + cycle + Simulator.d;
 
 		// 2. H return owner to L
 		str = homeid + ": gets request from L:" + localid +", L2 write hit(exclusive), sends owner to L:" + localid + ". This is a small message.";
@@ -171,7 +171,7 @@ public class Writer {
 			str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
 			Util.addOutput(cycle, str);
 		}
-		cycle = cycle + manhattanDistance * Simulator.C;
+		cycle = cycle + manhattanDistance * Simulator.C + Simulator.d;
 
 		// 2. H return sharers list to L.
 		// set block state to "exclusive"
