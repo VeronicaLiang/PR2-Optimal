@@ -104,7 +104,7 @@ public class Util {
 				for (int j=0; j<l2set.blockList.size(); j++) {
 					Block check = l2set.blockList.get(j);
 					if (check.tag.equals(l2blocktag)) {
-						check.cur_cycle = cur_cycle + Util.getManhattanDistance(coreid, homeid, Simulator.p);
+						check.cur_cycle = cur_cycle + Util.getManhattanDistance(coreid, homeid, Simulator.p)*Simulator.C;
 					}
 				}
 			}
@@ -140,7 +140,7 @@ public class Util {
 				int maxDist = 0;
 				ArrayList<String> sharers = homepro.l2.directory.blocktable.get(replacedBlockadd).sharers;
 				for (int k=0; k<sharers.size();k++){
-					int dist = Util.getManhattanDistance(homeid,sharers.get(k),Simulator.p);
+					int dist = Util.getManhattanDistance(homeid,sharers.get(k),Simulator.p)*Simulator.C;
 					if(maxDist < dist){
 						maxDist = dist;
 					}
@@ -156,9 +156,9 @@ public class Util {
 			}else if(homepro.l2.directory.blocktable.get(replacedBlockadd).state == Directory.MODIFIED_STATE){
 				// H sends replace to Owner
 				String owner = homepro.l2.directory.blocktable.get(replacedBlockadd).owner;
-				int home2owner = Util.getManhattanDistance(homeid,owner,Simulator.p);
+				int home2owner = Util.getManhattanDistance(homeid,owner,Simulator.p)*Simulator.C;
 				// Owner sends block to H; Owner delete block in L1
-				int local2owner = Util.getManhattanDistance(homeid,owner,Simulator.p);
+				int local2owner = Util.getManhattanDistance(homeid,owner,Simulator.p)*Simulator.C;
 				deleteL1Block(owner,replacedBlockadd);
 				// H update the block in L2
 				l2set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
