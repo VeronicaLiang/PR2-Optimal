@@ -229,7 +229,7 @@ public class Writer {
 				if (!rn.equals(localid)){
 					int latency = Util.getManhattanDistance(localid, rn, Simulator.p);
 					str = rn + ": gets invalidating message from L:" + localid + ", sends ack message to L:" + localid + ". this is small messages";
-					Util.addOutput(cycle + latency, str);
+					Util.addOutput(cycle + latency * Simulator.C, str);
 					if (latency > longestLatency) {
 						longestLatency = latency;
 					}
