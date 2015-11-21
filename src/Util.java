@@ -144,18 +144,27 @@ public class Util {
 					// R delete block in L1
 					deleteL1Block(sharers.get(k), replacedBlockadd);
 				}
+				// H update the block
+				l2set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
+				l2set.blockList.get(oc_index).data = 1;
+				l2set.blockList.get(oc_index).state = Directory.SHARED_STATE;
+				l2set.blockList.get(oc_index).cur_cycle = cur_cycle;
 				runcycle = maxDist;
 			}else if(homepro.l2.directory.blocktable.get(replacedBlockadd).state == Directory.MODIFIED_STATE){
-				// H sends replace to L
-				int home2local = Util.getManhattanDistance(homeid,coreid,Simulator.p);
-				// L sends block to H; L delete block in L1
-				int local2home = Util.getManhattanDistance(homeid,coreid,Simulator.p);
-				deleteL1Block(homepro.l2.directory.blocktable.get(replacedBlockadd).owner,replacedBlockadd);
-				runcycle = home2local + local2home;
+				// H sends replace to Owner
+				String owner = homepro.l2.directory.blocktable.get(replacedBlockadd).owner;
+				int home2owner = Util.getManhattanDistance(homeid,owner,Simulator.p);
+				// Owner sends block to H; Owner delete block in L1
+				int local2owner = Util.getManhattanDistance(homeid,owner,Simulator.p);
+				deleteL1Block(owner,replacedBlockadd);
+				// H update the block in L2
+				l2set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
+				l2set.blockList.get(oc_index).data = 1;
+				l2set.blockList.get(oc_index).state = Directory.SHARED_STATE;
+				l2set.blockList.get(oc_index).cur_cycle = cur_cycle;
+				runcycle = home2owner + local2owner;
 			}
-
 		}
-
 		return runcycle;
 	}
 	
