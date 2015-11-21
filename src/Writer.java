@@ -10,11 +10,11 @@ public class Writer {
 		Processor pro = Simulator.processorsTable.get(coreid);
 		String homeid = Integer.parseInt(add.substring(19-Simulator.p+1, 20),2) +"";
 		Processor homeProcessor = Simulator.processorsTable.get(homeid);
-		boolean isHitorMiss = Util.hitOrMiss(add, pro, Simulator.n1, Simulator.a1, Simulator.b);
+		boolean hit = Util.hitOrMiss(add, pro, Simulator.n1, Simulator.a1, Simulator.b);
 		int manhattanDistance = Util.getManhattanDistance(coreid, homeid, Simulator.p);
 		int cycles = 0;
 		cycles = Simulator.d;
-		if(isHitorMiss){
+		if(hit){
 			//L to H
 			cycles = cycles+manhattanDistance * Simulator.C;
 			
@@ -155,4 +155,10 @@ public class Writer {
 		}
 		return cycles;
 	}
+	
+	public int hitExclusive(String localid, String homeid, String address, int cycle) {
+		
+		return cycle;
+	}
+	
 }
