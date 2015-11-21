@@ -50,8 +50,8 @@ public class Simulator {
 
 	public static HashMap<String, Processor> processorsTable = new HashMap<String, Processor>();
 	public static HashMap<Integer, ArrayList<String>> outputList = new HashMap<Integer, ArrayList<String>>();
-	public static ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
-	public static Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
+	public ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
+	public Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
 
 	public Simulator(String inputFile) {
 		Hashtable<Integer, ArrayList<TraceItem>> commands = initializeUnits(inputFile);
@@ -85,45 +85,40 @@ public class Simulator {
 						runningList.put(cur.tag, finishCycle);
 					}
 				}
-				for (int i = 0; i < waitingList.size(); i++) {
-					TraceItem cur = waitingList.get(i);
-					if (runningList.containsKey(cur.tag)){
-						if (runningList.get(cur.tag) <= clockcycle && !cur.issued) {
-							if (cur.error > 0) {
-								cur.error = cur.error - 1;
-							} else {
-								cur.issued = true;
-								runningList.put(cur.tag, 0);
-								if (cur.operationFlag == 0) {
-									// Issue a read operation
-									finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
-								} else if (cur.operationFlag == 1) {
-									// Issue a write operation
-									finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
-								}
-								if (lastCycle < finishCycle) {
-									lastCycle = finishCycle;
-								}
-								runningList.put(cur.tag, finishCycle);
-							}
-
-						}
-					}
-					
-				}
+				
 				commands.remove(clockcycle);
 			}
 			
-			
-			clockcycle++;
-			if (commands.size() == 0) {
-				finish = true;
-				for (int i = 0; i < waitingList.size(); i++) {
-					if (!waitingList.get(i).issued) {
-						finish = false;
-						break;
+			for (int i = 0; i < waitingList.size(); i++) {
+				TraceItem cur = waitingList.get(i);
+				if (runningList.containsKey(cur.previous)){
+					if (runningList.get(cur.previous) <= clockcycle && !cur.issued) {
+						if (cur.error > 0) {
+							cur.error = cur.error - 1;
+						} else {
+							cur.issued = true;
+							runningList.put(cur.tag, 0);
+							if (cur.operationFlag == 0) {
+								// Issue a read operation
+								finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
+							} else if (cur.operationFlag == 1) {
+								// Issue a write operation
+								finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
+							}
+							if (lastCycle < finishCycle) {
+								lastCycle = finishCycle;
+							}
+							runningList.put(cur.tag, finishCycle);
+						}
+
 					}
 				}
+				
+			}
+			
+			clockcycle++;
+			if (clockcycle > lastCycle) {
+				finish = true;
 			}
 			
 		}
@@ -175,10 +170,14 @@ public class Simulator {
 			FileReader filereader = new FileReader(inputFile);
 			BufferedReader bufferedreader = new BufferedReader(filereader);
 			int tag = 0;
+			int maxCycle = 0;
 			while ((line = bufferedreader.readLine()) != null) {
 				String[] ss = line.split(" ");
 				TraceItem item = new TraceItem();
 				item.cycle = Integer.parseInt(ss[0]);
+				if (maxCycle < item.cycle) {
+					maxCycle = item.cycle;
+				}
 				item.coreid = ss[1];
 				item.operationFlag = Integer.parseInt(ss[2]);
 				item.address = Util.hexToBinary(ss[3].substring(2));
@@ -200,7 +199,7 @@ public class Simulator {
 			// check if any operations are consecutive
 			Hashtable<String, TraceItem> htlast = new Hashtable<String, TraceItem>();
 			Hashtable<String, TraceItem> htnow = new Hashtable<String, TraceItem>();
-			for (int i = 0; i < commands.size(); i++) {
+			for (int i = 1; i <= maxCycle; i++) {
 				if(commands.containsKey(i)) {
 					ArrayList<TraceItem> items = commands.get(i);
 					htnow = new Hashtable<String, TraceItem>();

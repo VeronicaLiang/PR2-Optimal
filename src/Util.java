@@ -11,7 +11,7 @@ public class Util {
 			if (outputList.containsKey(i)){
 				strList = outputList.get(i);
 				for (int j = 0; j < strList.size(); j++) {
-					System.out.println(strList.get(j));
+					System.out.println("Cycle " + i + " --> " + strList.get(j));
 				}
 			}
 		}
@@ -198,7 +198,17 @@ public class Util {
 	}
 	
 	public static int getBlockStatus(String coreid, String address) {
-		return 0;
+		// set state of block in node to some state
+		Processor pro = Simulator.processorsTable.get(coreid);
+		String setloc = address.substring(31 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
+		//Set l1set = ;
+		String tag = address.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
+		for (int i = 0; i < pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.size(); i++){
+			if(pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).tag.equals(tag)){
+				return pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).state;
+			}
+		}
+		return -1;
 	}
 	
 	public static void updateLRU (String address, String coreid, String l, int cycle) {
@@ -221,6 +231,16 @@ public class Util {
 			}
 		}
 		
+	}
+	
+	public static void addOutput (int cycle, String str) {
+		if (Simulator.outputList.containsKey(cycle)) {
+			Simulator.outputList.get(cycle).add(str);
+		} else {
+			ArrayList<String> tmp = new ArrayList<String>();
+			tmp.add(str);
+			Simulator.outputList.put(cycle, tmp);
+		}
 	}
 
 	public static String getBlockAddress(Block curbloc){

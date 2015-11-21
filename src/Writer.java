@@ -41,6 +41,8 @@ public class Writer {
 
 	public int hitExclusive(String localid, String address, int cycle) {
 		Util.updateLRU(address, localid, "l1", cycle);
+		String str = localid + ": L1 write hit, write block.";
+		Util.addOutput(cycle, str);
 		return cycle;
 	}
 
@@ -50,19 +52,31 @@ public class Writer {
 		Processor processor = Simulator.processorsTable.get(homeid);
 
 		// 1. L sends request to H
+		String str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
+		Util.addOutput(cycle, str);
 		cycle = cycle + local2home * Simulator.C;
 
 		// 2. H sends request to 0
+		str = homeid + ": gets request from L:" + localid +", L2 write miss, sends request to Memory Controller:0. This is a small message.";
+		Util.addOutput(cycle, str);
 		cycle = cycle + home2controller * Simulator.C;
 
 		// 3. 0 get data from mem
 		// return to H
-		cycle = cycle + Simulator.d1 + home2controller * Simulator.C;
+		str = 0 + ": gets request from H:" + homeid +", starts to fetch data from memroy.";
+		Util.addOutput(cycle, str);
+		cycle = cycle + Simulator.d1;
+		
+		str = 0 + ": gets request from H:" + homeid +", gets block from memory, sends blocks to H:" + homeid + ". This is a large message.";
+		Util.addOutput(cycle, str);
+		cycle = cycle + home2controller * Simulator.C;
 
 		// 4. H get data, return to L
 		// set state of block to "exclusive" in dir
 		// store to l2
 		// add sharer L
+		str = homeid + ": gets block from Memory Controller:0, sends blocks to L:" + localid + ". This is a large message.";
+		Util.addOutput(cycle, str);
 		cycle = cycle + Util.storeBlockToCache(address, "l2", homeid, cycle);
 		processor.l2.directory.blocktable.get(address).state = Directory.MODIFIED_STATE;
 		processor.l2.directory.blocktable.get(address).sharers.add(localid);
@@ -71,6 +85,8 @@ public class Writer {
 		// L get data
 		// store to l1
 		// set state of block to "exclusive"
+		str = localid + ": gets block from H:" + homeid + ", write block";
+		Util.addOutput(cycle, str);
 		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
 		Util.setBlockStatus(localid, address, Directory.MODIFIED_STATE);
 
@@ -81,19 +97,29 @@ public class Writer {
 		Processor processor = Simulator.processorsTable.get(homeid);
 
 		// 1. L sends request to H
+		String str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
+		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
 		cycle = manhattanDistance * Simulator.C + cycle;
 
 		// 2. H return owner to L
+		str = homeid + ": gets request from L:" + localid +", L2 write hit(exclusive), sends owner to L:" + localid + ". This is a small message.";
+		Util.addOutput(cycle, str);
 		cycle = manhattanDistance * Simulator.C + cycle;
 
 		// 3. L get R, sends request to R
 		String remoteid = processor.l2.directory.blocktable.get(address).owner;
+		str = localid + ": gets owner from H:" + homeid +", sends request to R:" + remoteid + ". This is a small message.";
+		Util.addOutput(cycle, str);
 		manhattanDistance = Util.getManhattanDistance(localid, remoteid, Simulator.p);
 		cycle = manhattanDistance * Simulator.C + cycle;
 
 		// 4. R sends block to L and H
 		// set state of block to "invalid"
+		str = remoteid + ": gets request from L:" + localid +", sends block to L:" + localid + ". This is a large message.";
+		Util.addOutput(cycle, str);
+		str = remoteid + ": gets request from L:" + localid +", sends inform to H:" + homeid + ". This is a small message.";
+		Util.addOutput(cycle, str);
 		Util.setBlockStatus(remoteid, address, Directory.INVALID_STATE);
 		int cycleByL = 0;
 		int cycleByH = 0;
@@ -103,6 +129,8 @@ public class Writer {
 		// L get block
 		// store to L1
 		// set state of Block to "exclusive"
+		str = localid + ": gets block from R:" + remoteid + ", write block.";
+		Util.addOutput(cycleByL, str);
 		cycleByL = cycleByL + Util.storeBlockToCache(address, "l1", localid, cycleByL);
 		Util.setBlockStatus(localid, address, Directory.MODIFIED_STATE);
 
@@ -111,7 +139,9 @@ public class Writer {
 
 		// H change to "exclusive"
 		// store to L2
-		// add sharer
+		// set owner to L
+		str = homeid + ": gets block from R:" + remoteid + ", sets owner to L:" + localid;
+		Util.addOutput(cycleByH, str);
 		processor.l2.directory.blocktable.get(address).state = Directory.MODIFIED_STATE;
 		Util.updateLRU(address, homeid, "l2", cycle + cycleByH);
 		processor.l2.directory.blocktable.get(address).owner = localid;
@@ -123,7 +153,16 @@ public class Writer {
 	public int share(String localid, String homeid, String address, int cycle, boolean hit) {
 		Processor Processor = Simulator.processorsTable.get(homeid);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
+		
+		String str = "";
 		// 1. L sends request to H
+		if (hit) {
+			str = localid + ": L1 write hit(shared), sends request to H:" + homeid +". This is a small message.";
+			Util.addOutput(cycle, str);
+		} else {
+			str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
+			Util.addOutput(cycle, str);
+		}
 		cycle = cycle + manhattanDistance * Simulator.C;
 
 		// 2. H return sharers list to L.
@@ -133,39 +172,82 @@ public class Writer {
 		Processor.l2.directory.blocktable.get(address).owner = localid;
 		Processor.l2.directory.blocktable.get(address).state = Directory.MODIFIED_STATE;
 		if (hit) {
+			str = homeid + ": gets request from L:" + localid +", sends sharer list to L:" + localid + ". This is a small message.";
+			Util.addOutput(cycle, str);
 			// return a small message
 		} else {
+			str = homeid + ": gets request from L:" + localid +", L2 write hit(shared), sends sharer list and block to L:" + localid + ". This is a large message.";
+			Util.addOutput(cycle, str);
 			// return a large message
 		}
 		cycle = cycle + manhattanDistance * Simulator.C;
 
-		// 3. L sends invalidating message to sharers
-		// set state to exclusive
-		if (!hit) {
-			cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
-		}
-		Util.setBlockStatus(localid, address, Directory.MODIFIED_STATE);
-		int longestLatency = 0;
-		for (int i = 0; i < Processor.l2.directory.blocktable.get(address).sharers.size(); i++) {
-			int latency = Util.getManhattanDistance(localid,
-					Processor.l2.directory.blocktable.get(address).sharers.get(i), Simulator.p);
-			if (latency > longestLatency) {
-				longestLatency = latency;
+		boolean hit1 = hit && Processor.l2.directory.blocktable.get(address).sharers.size() == 1;
+		boolean miss0 = !hit && Processor.l2.directory.blocktable.get(address).sharers.size() == 0;
+		
+		if (hit1 || miss0) {
+			// 3. there is no other sharer, perform write
+			if (hit) {
+				str = localid + ": gets sharer list from H:" + homeid + ", but there is no other sharer, write block.";
+				Util.addOutput(cycle, str);
+			} else {
+				str = localid + ": gets sharer list and block from H:" + homeid + ", but there is no other sharer, write block.";
+				Util.addOutput(cycle, str);
 			}
-		}
-		cycle = cycle + longestLatency * Simulator.C;
+			
+			if (!hit) {
+				cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
+			}
+			
+			Util.updateLRU(address, localid, "l1", cycle);
+		} else {
+			// 3. L sends invalidating message to sharers
+			// set state to exclusive
+			if (hit) {
+				str = localid + ": gets sharer list from H:" + homeid + ", sends invalidating message to Rs. Those are small messages";
+				Util.addOutput(cycle, str);
+			} else {
+				str = localid + ": gets sharer list and block from H:" + homeid + ", sends invalidating message to Rs. Those are small messages";
+				Util.addOutput(cycle, str);
+			}
+			
+			if (!hit) {
+				cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
+			}
+			Util.setBlockStatus(localid, address, Directory.MODIFIED_STATE);
+			int longestLatency = 0;
+			for (int i = 0; i < Processor.l2.directory.blocktable.get(address).sharers.size(); i++) {
+				String rn = Processor.l2.directory.blocktable.get(address).sharers.get(i);
+				if (!rn.equals(localid)){
+					int latency = Util.getManhattanDistance(localid, rn, Simulator.p);
+					str = rn + ": gets invalidating message from L:" + localid + ", sends ack message to L:" + localid + ". this is small messages";
+					Util.addOutput(cycle + latency, str);
+					if (latency > longestLatency) {
+						longestLatency = latency;
+					}
+				}
+				
+			}
+			cycle = cycle + longestLatency * Simulator.C;
 
-		// 4. R sets block state to "invalid"
-		// send ack to L
-		for (int i = 0; i < Processor.l2.directory.blocktable.get(address).sharers.size(); i++) {
-			String rn = Processor.l2.directory.blocktable.get(address).sharers.get(i);
-			// set remote blocks' state to invalid
-			Util.setBlockStatus(rn, address, Directory.INVALID_STATE);
-		}
-		cycle = cycle + longestLatency * Simulator.C;
+			// 4. R sets block state to "invalid"
+			// send ack to L
+			for (int i = 0; i < Processor.l2.directory.blocktable.get(address).sharers.size(); i++) {
+				String rn = Processor.l2.directory.blocktable.get(address).sharers.get(i);
+				if (!rn.equals(localid)){
+					// set remote blocks' state to invalid
+					Util.setBlockStatus(rn, address, Directory.INVALID_STATE);
+				}
+			}
+			cycle = cycle + longestLatency * Simulator.C;
 
-		// L get ack, perform write
-		Util.updateLRU(address, localid, "l1", cycle);
+			// L get ack, perform write
+			str = localid + ": gets all ack from Rs:, write block.";
+			Util.addOutput(cycle, str);
+			Util.updateLRU(address, localid, "l1", cycle);
+		}
+		
+		
 
 		return cycle;
 	}
