@@ -12,4 +12,5 @@ public class Block {
 	 */
 	int state;
 	int cur_cycle;
+	String address;
 }

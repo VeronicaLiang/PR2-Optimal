@@ -33,7 +33,7 @@ public class Util {
 	public static Boolean hitOrMiss(String add, Processor pro, int n, int a, int b) {
 		// 0.......31-n+a|31-n+a+1.......31-b|31-b+1..........31
 		// |-------------|-------------------|-----------------|
-		// |TAG |SET INDEX |OFFSET |
+		// |TAG          |SET INDEX          |OFFSET           |
 		// |-------------|-------------------|-----------------|
 		// 31.........n-a|n-a-1.............b|b-1..............0
 
@@ -65,53 +65,86 @@ public class Util {
 	}
 
 	public static int storeBlockToCache(String add, String l, String coreid, int cur_cycle) {
+		String homeid = Integer.parseInt(add.substring(19-Simulator.p+1, 20),2) +"";
 		if (l.equals("l1")) {
 			Processor pro = Simulator.processorsTable.get(coreid);
-			String homeid = Integer.parseInt(add.substring(19-Simulator.p+1, 20),2) +"";
 			String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
 			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
-			boolean flag = false;
 			int oldest_cycle = -1;
 			int oc_index = -1;
 			for (int i = 0; i < l1set.blockList.size(); i++) {
 				if (l1set.blockList.get(i).data == 0) {
 					l1set.blockList.get(i).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
 					l1set.blockList.get(i).data = 1;
-					l1set.blockList.get(i).state = Directory.SHARED_STATE;
+//					l1set.blockList.get(i).state = Directory.SHARED_STATE;
 					l1set.blockList.get(i).cur_cycle = cur_cycle;
-					flag = true;
-					break;
+					l1set.blockList.get(i).address = add;
+					return 0;
 				}
 				if ((oldest_cycle == -1) || (oldest_cycle > l1set.blockList.get(i).cur_cycle)) {
 					oldest_cycle = l1set.blockList.get(i).cur_cycle;
 					oc_index = i;
 				}
 			}
-			if (!flag) {
-				// replace l1 block
-				l1set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
-				l1set.blockList.get(oc_index).data = 1;
-				l1set.blockList.get(oc_index).cur_cycle = cur_cycle;
-				Processor homepro = Simulator.processorsTable.get(homeid);
-				if (pro.l2.directory.blocktable.get(add).state == Directory.SHARED_STATE){
-					pro.l2.directory.blocktable.get(add).sharers.remove(coreid);
-				}else{
-					String l2setloc =  add.substring(31-Simulator.n2+Simulator.a2+1,31-Simulator.b+1);
-					Set l2set = homepro.l2.setsList.get(Integer.parseInt(l2setloc,2));
-					String l2blocktag = add.substring(0,31-Simulator.n2+Simulator.a2+1);
-					for (int j=0; j<l2set.blockList.size(); j++) {
-						Block check = l2set.blockList.get(j);
-						if (check.tag.equals(l2blocktag)) {
-							check.cur_cycle = cur_cycle + Util.getManhattanDistance(coreid, homeid, Simulator.p);
-						}
+
+			// replace l1 block
+			l1set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
+			l1set.blockList.get(oc_index).data = 1;
+			l1set.blockList.get(oc_index).cur_cycle = cur_cycle;
+			Processor homepro = Simulator.processorsTable.get(homeid);
+			// write back to l2
+			String replacedBlockadd = getBlockAddress(l1set.blockList.get(oc_index));
+			if (homepro.l2.directory.blocktable.get(replacedBlockadd).state == Directory.SHARED_STATE){
+				homepro.l2.directory.blocktable.get(replacedBlockadd).sharers.remove(coreid);
+			}else{
+				String l2setloc =  replacedBlockadd.substring(31-Simulator.n2+Simulator.a2+1,31-Simulator.b+1);
+				Set l2set = homepro.l2.setsList.get(Integer.parseInt(l2setloc,2));
+				String l2blocktag = replacedBlockadd.substring(0,31-Simulator.n2+Simulator.a2+1);
+				for (int j=0; j<l2set.blockList.size(); j++) {
+					Block check = l2set.blockList.get(j);
+					if (check.tag.equals(l2blocktag)) {
+						check.cur_cycle = cur_cycle + Util.getManhattanDistance(coreid, homeid, Simulator.p);
 					}
 				}
-				pro.l2.directory.blocktable.get(add).state = Directory.SHARED_STATE;
-				pro.l2.directory.blocktable.get(add).sharers.remove(coreid);
 			}
+			homepro.l2.directory.blocktable.get(replacedBlockadd).state = Directory.SHARED_STATE;
+			homepro.l2.directory.blocktable.get(replacedBlockadd).sharers.remove(coreid);
 			return 0;
+
 		} else if (l.equals("l2")) {
 			// TODO store block to cache
+			Processor homepro = Simulator.processorsTable.get(homeid);
+			String setlocl2 = add.substring(32 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b + 1);
+			Set l2set = homepro.l1.setsList.get(Integer.parseInt(setlocl2, 2));
+			int oldest_cycle = -1;
+			int oc_index = -1;
+			for (int i = 0; i < l2set.blockList.size(); i++) {
+				if (l2set.blockList.get(i).data == 0) {
+					l2set.blockList.get(i).tag = add.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
+					l2set.blockList.get(i).data = 1;
+					l2set.blockList.get(i).state = Directory.SHARED_STATE;
+					l2set.blockList.get(i).cur_cycle = cur_cycle;
+					return 0;
+				}
+				if ((oldest_cycle == -1) || (oldest_cycle > l2set.blockList.get(i).cur_cycle)) {
+					oldest_cycle = l2set.blockList.get(i).cur_cycle;
+					oc_index = i;
+				}
+			}
+			String replacedBlockadd = getBlockAddress(l2set.blockList.get(oc_index));
+			if (homepro.l2.directory.blocktable.get(replacedBlockadd).state == Directory.SHARED_STATE){
+				// H sends replace to sharers (R)
+				int maxDist = 0;
+				ArrayList<String> sharers = homepro.l2.directory.blocktable.get(replacedBlockadd).sharers;
+				for (int k=0; k<sharers.size();k++){
+					int dist = Util.getManhattanDistance(homeid,sharers.get(k),Simulator.p);
+					if(maxDist < dist){
+						maxDist = dist;
+					}
+					
+				}
+			}
+
 		}
 		//TODO temporarily return 0
 		return 0;
@@ -129,6 +162,11 @@ public class Util {
 			}
 		}
 	}
-	
+
+	public static String getBlockAddress(Block curbloc){
+		//
+
+		return curbloc.address;
+	}
 
 }
