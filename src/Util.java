@@ -69,7 +69,7 @@ public class Util {
 		int runcycle = 0;
 		if (l.equals("l1")) {
 			Processor pro = Simulator.processorsTable.get(coreid);
-			String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
+			String setloc = add.substring(31 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
 			Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
 			int oldest_cycle = -1;
 			int oc_index = -1;
