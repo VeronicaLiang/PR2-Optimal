@@ -3,7 +3,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.IntSummaryStatistics;
 
 /*
  * The simulator is trace driven. That is memory load and store operations will specified in an

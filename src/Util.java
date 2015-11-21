@@ -3,9 +3,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Util {
-	public static int add(int a, int b) {
-		return a + b;
-	}
+
 
 	public static void printOutputList(HashMap<Integer, ArrayList<String>> outputList, int last) {
 		ArrayList<String> strList = new ArrayList<String>();
