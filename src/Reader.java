@@ -9,11 +9,14 @@ public class Reader {
 		Processor pro = (Processor) Simulator.processorsTable.get(coreid);
 		boolean l1readHit = Util.hitOrMiss(address, pro, Simulator.n1, Simulator.a1, Simulator.b);
 		if (l1readHit) {
-			System.out.println(coreid + ": L1 read hit");
-			return cycle;
+			return readHit(cycle);
 		} else {
 			return readMiss(address, coreid, cycle);
 		}
+	}
+	
+	public int readHit(int cycle) {
+		return cycle;
 	}
 
 	public int readMiss(String add, String coreid, int cur_cycle){
@@ -110,7 +113,7 @@ public class Reader {
 		// 4. R sends block to L and H
 		// set state of block to "shared"
 		Util.setBlockStatus(remoteid, address, Directory.SHARED_STATE);
-		cycle = cycle + Math.max(Util.getManhattanDistance(localid, remoteid, Simulator.p), Util.getManhattanDistance(localid, remoteid, Simulator.p))*Simulator.C;
+		cycle = cycle + Math.max(Util.getManhattanDistance(localid, remoteid, Simulator.p), Util.getManhattanDistance(homeid, remoteid, Simulator.p))*Simulator.C;
 		
 		// L get block
 		// store to L1
