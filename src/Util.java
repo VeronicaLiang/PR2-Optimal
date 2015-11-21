@@ -37,7 +37,7 @@ public class Util {
 		// |-------------|-------------------|-----------------|
 		// 31.........n-a|n-a-1.............b|b-1..............0
 
-		String setloc = add.substring(32 - n + a + 1, 31 - b + 1);
+		String setloc = add.substring(31 - n + a + 1, 31 - b + 1);
 		String blocktag = add.substring(0, 31 - n + a + 1);
 
 		Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc, 2));
