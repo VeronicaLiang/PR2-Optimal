@@ -9,13 +9,14 @@ public class Reader {
 		Processor pro = (Processor) Simulator.processorsTable.get(coreid);
 		boolean l1readHit = Util.hitOrMiss(address, pro, Simulator.n1, Simulator.a1, Simulator.b);
 		if (l1readHit) {
-			return readHit(cycle);
+			return readHit(address, coreid, cycle);
 		} else {
 			return readMiss(address, coreid, cycle);
 		}
 	}
 	
-	public int readHit(int cycle) {
+	public int readHit(String address, String coreid, int cycle) {
+		Util.updateLRU (address, coreid, "l1", cycle); 
 		return cycle;
 	}
 
@@ -82,8 +83,10 @@ public class Reader {
 		
 		// 2. H return block to L
 		// add sharer L
+		Util.updateLRU (address, homeid, "l2", cycle);
 		cycle = manhattanDistance * Simulator.C + Simulator.d + cycle;
 		processor.l2.directory.blocktable.get(address).sharers.add(localid);
+		
 		
 		
 		// L get data
@@ -113,23 +116,27 @@ public class Reader {
 		// 4. R sends block to L and H
 		// set state of block to "shared"
 		Util.setBlockStatus(remoteid, address, Directory.SHARED_STATE);
-		cycle = cycle + Math.max(Util.getManhattanDistance(localid, remoteid, Simulator.p), Util.getManhattanDistance(homeid, remoteid, Simulator.p))*Simulator.C;
+		int cycleByL = 0;
+		int cycleByH = 0;
+		cycleByL = Util.getManhattanDistance(localid, remoteid, Simulator.p)*Simulator.C;
+		cycleByH = Util.getManhattanDistance(homeid, remoteid, Simulator.p)*Simulator.C;
 		
 		// L get block
 		// store to L1
 		// set state of Block to "shared"
-		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
+		cycleByL = cycleByL + Util.storeBlockToCache(address, "l1", localid, cycleByL);
 		Util.setBlockStatus(localid, address, Directory.SHARED_STATE);
 		
 		// H change to "shared"
 		// store to L2
 		// add sharer
 		processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
-		cycle = cycle + Util.storeBlockToCache(address, "l2", homeid, cycle);
+		cycleByH = cycleByH + Util.storeBlockToCache(address, "l2", homeid, cycleByH);
 		processor.l2.directory.blocktable.get(address).sharers.clear();
 		processor.l2.directory.blocktable.get(address).sharers.add(remoteid);
 		processor.l2.directory.blocktable.get(address).sharers.add(localid);
 		
+		cycle = cycle + Math.max(cycleByL, cycleByH);
 		return cycle;
 	}
 }
