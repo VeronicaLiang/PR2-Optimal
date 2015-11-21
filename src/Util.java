@@ -66,6 +66,7 @@ public class Util {
 
 	public static int storeBlockToCache(String add, String l, String coreid, int cur_cycle) {
 		String homeid = Integer.parseInt(add.substring(19-Simulator.p+1, 20),2) +"";
+		int runcycle = 0;
 		if (l.equals("l1")) {
 			Processor pro = Simulator.processorsTable.get(coreid);
 			String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
@@ -112,7 +113,6 @@ public class Util {
 			return 0;
 
 		} else if (l.equals("l2")) {
-			// TODO store block to cache
 			Processor homepro = Simulator.processorsTable.get(homeid);
 			String setlocl2 = add.substring(32 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b + 1);
 			Set l2set = homepro.l1.setsList.get(Integer.parseInt(setlocl2, 2));
@@ -141,13 +141,22 @@ public class Util {
 					if(maxDist < dist){
 						maxDist = dist;
 					}
-					
+					// R delete block in L1
+					deleteL1Block(sharers.get(k), replacedBlockadd);
 				}
+				runcycle = maxDist;
+			}else if(homepro.l2.directory.blocktable.get(replacedBlockadd).state == Directory.MODIFIED_STATE){
+				// H sends replace to L
+				int home2local = Util.getManhattanDistance(homeid,coreid,Simulator.p);
+				// L sends block to H; L delete block in L1
+				int local2home = Util.getManhattanDistance(homeid,coreid,Simulator.p);
+				deleteL1Block(homepro.l2.directory.blocktable.get(replacedBlockadd).owner,replacedBlockadd);
+				runcycle = home2local + local2home;
 			}
 
 		}
-		//TODO temporarily return 0
-		return 0;
+
+		return runcycle;
 	}
 	
 	public static void setBlockStatus(String coreid, String add,int blockStatus) {
@@ -159,6 +168,19 @@ public class Util {
 		for (int i = 0; i < pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.size(); i++){
 			if(pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).tag.equals(tag)){
 				pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).state = blockStatus;
+			}
+		}
+	}
+
+	public static void deleteL1Block(String coreid, String add){
+		Processor pro = Simulator.processorsTable.get(coreid);
+		String setloc = add.substring(32 - Simulator.n1 + Simulator.a1 + 1, 31 - Simulator.b + 1);
+		//Set l1set = ;
+		String tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
+		for (int i = 0; i < pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.size(); i++){
+			if(pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).tag.equals(tag)){
+				pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).tag ="";
+				pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).data = 0;
 			}
 		}
 	}
