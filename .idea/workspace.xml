@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b86a3e7e-89fb-4713-a457-1e4ae54b675c" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Simulator.java" afterPath="$PROJECT_DIR$/src/Simulator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Util.java" afterPath="$PROJECT_DIR$/src/Util.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Writer.java" afterPath="$PROJECT_DIR$/src/Writer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tracefile-1.txt" afterPath="$PROJECT_DIR$/tracefile-1.txt" />
     </list>
     <ignored path="PR2-Optimal.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -40,10 +37,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Util.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Util.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Util.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.62739724">
+            <state vertical-scroll-proportion="0.0">
               <caret line="104" column="57" selection-start-line="104" selection-start-column="20" selection-end-line="104" selection-end-column="57" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -85,10 +82,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Simulator.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Simulator.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Simulator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
+            <state vertical-scroll-proportion="0.53424656">
               <caret line="252" column="28" selection-start-line="252" selection-start-column="28" selection-end-line="252" selection-end-column="28" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -151,8 +148,8 @@
         <option value="$PROJECT_DIR$/src/Reader.java" />
         <option value="$PROJECT_DIR$/src/Block.java" />
         <option value="$PROJECT_DIR$/src/Writer.java" />
-        <option value="$PROJECT_DIR$/src/Simulator.java" />
         <option value="$PROJECT_DIR$/src/Util.java" />
+        <option value="$PROJECT_DIR$/src/Simulator.java" />
       </list>
     </option>
   </component>
@@ -646,27 +643,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Simulator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="252" column="28" selection-start-line="252" selection-start-column="28" selection-end-line="252" selection-end-column="28" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1320#1339#0" expanded="true" />
-            <element signature="e#1418#1446#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Util.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.62739724">
+        <state vertical-scroll-proportion="0.0">
           <caret line="104" column="57" selection-start-line="104" selection-start-column="20" selection-end-line="104" selection-end-column="57" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#246#254#0" expanded="true" />
             <element signature="e#10649#10650#0" expanded="true" />
             <element signature="e#10678#10679#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Simulator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.53424656">
+          <caret line="252" column="28" selection-start-line="252" selection-start-column="28" selection-end-line="252" selection-end-column="28" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1320#1339#0" expanded="true" />
+            <element signature="e#1418#1446#0" expanded="true" />
           </folding>
         </state>
       </provider>

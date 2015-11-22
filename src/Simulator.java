@@ -250,7 +250,7 @@ public class Simulator {
 			Simulator.b = 6;// The size of a block
 			Simulator.a1 = 2;// The power of the associativity of l1 with a root
 								// of 2
-			Simulator.a2 = 4;// The power of the associativity of l2 with a root
+			Simulator.a2 = 2;// The power of the associativity of l2 with a root
 								// of 2
 			Simulator.C = 3;// The number of delay cycles caused by
 							// communicating between two nodes(a node consists
