@@ -132,6 +132,7 @@ public class Simulator {
 		
 	}
 
+	@SuppressWarnings({ "unchecked", "resource" })
 	Hashtable<Integer, ArrayList<TraceItem>> initializeUnits(String inputFile) {
 		// Initialize
 		// processors===============================================================
@@ -148,7 +149,7 @@ public class Simulator {
 		// int numberOfSetInL1 = numberOfBlocksInL1/associativityOfL1;
 		int numberOfSetInL1 = (int) Math.pow(base, (n1 - a1 - b));
 
-		// the size of l1
+		// the size of l2
 		int sizeOfl2 = (int) Math.pow(base, n2);
 		// the number of blocks in the l2=the size of l2/the size of a block
 		int numberOfBlocksInL2 = sizeOfl2 / ((int) Math.pow(base, b));
@@ -178,34 +179,37 @@ public class Simulator {
 			int tag = 0;
 			int maxCycle = 0;
 			while ((line = bufferedreader.readLine()) != null) {
-				String[] ss = line.split(" ");
-				TraceItem item = new TraceItem();
-				item.cycle = Integer.parseInt(ss[0]);
-				if (maxCycle < item.cycle) {
-					maxCycle = item.cycle;
+				if (!line.trim().equals("")){
+					String[] ss = line.split(" ");
+					TraceItem item = new TraceItem();
+					item.cycle = Integer.parseInt(ss[0]);
+					if (maxCycle < item.cycle) {
+						maxCycle = item.cycle;
+					}
+					item.coreid = ss[1];
+					item.operationFlag = Integer.parseInt(ss[2]);
+//					item.address = Util.hexToBinary(ss[3].substring(2));
+					item.origin = Util.hexToBinary(ss[3].substring(2));
+					String pad = "";
+					for (int k=0; k<b; k++){
+						pad += "0";
+					}
+					item.address = item.origin.substring(0,31-b+1) + pad;
+					item.tag = tag + "";
+					tag++;
+					boolean ccexist = commands.containsKey(Integer.parseInt(ss[0]));
+					if (ccexist) {
+						commands.get(Integer.parseInt(ss[0])).add(item);
+					} else {
+						ArrayList<TraceItem> tmp = new ArrayList<TraceItem>();
+						tmp.add(item);
+						commands.put(Integer.parseInt(ss[0]), tmp);
+					}
+					// traceList.add(item);
+					System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
+							+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
 				}
-				item.coreid = ss[1];
-				item.operationFlag = Integer.parseInt(ss[2]);
-//				item.address = Util.hexToBinary(ss[3].substring(2));
-				item.origin = Util.hexToBinary(ss[3].substring(2));
-				String pad = "";
-				for (int k=0; k<b; k++){
-					pad += "0";
-				}
-				item.address = item.origin.substring(0,31-b+1) + pad;
-				item.tag = tag + "";
-				tag++;
-				boolean ccexist = commands.containsKey(Integer.parseInt(ss[0]));
-				if (ccexist) {
-					commands.get(Integer.parseInt(ss[0])).add(item);
-				} else {
-					ArrayList<TraceItem> tmp = new ArrayList<TraceItem>();
-					tmp.add(item);
-					commands.put(Integer.parseInt(ss[0]), tmp);
-				}
-				// traceList.add(item);
-				System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
-						+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
+				
 				
 			}
 			// check if any operations are consecutive
