@@ -17,9 +17,11 @@ public class Writer {
 			int blockStatus = Util.getBlockStatus(coreid, add);
 			if (blockStatus == Directory.MODIFIED_STATE) {
 				// write hit, exclusive
+				Util.addCount(coreid, 1, true);
 				return hitExclusive(coreid, add, cycle);
 			} else {
 				// write hit, shared
+				Util.addCount(coreid, 1, false);
 				return share(coreid, homeid, add, cycle, hit);
 			}
 		} else {
@@ -32,6 +34,7 @@ public class Writer {
 //			System.out.println("************");
 			if (homeProcessor.l2.directory.blocktable.containsKey(add)) {
 				// write miss, l2 hit
+				Util.addCount(homeid, 2, true);
 				if (homeProcessor.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE) {
 					// write miss, l2 exclusive
 					return missExclusive(coreid, homeid, add, cycle);
@@ -41,6 +44,7 @@ public class Writer {
 				}
 			} else {
 				// write miss, l2 uncached
+				Util.addCount(homeid, 2, false);
 				return uncached(coreid, homeid, add, cycle);
 			}
 		}
@@ -59,12 +63,14 @@ public class Writer {
 		Processor processor = Simulator.processorsTable.get(homeid);
 
 		// 1. L sends request to H
-		String str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
+		String str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a short message.";
+		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + local2home * Simulator.C + Simulator.d;
 
 		// 2. H sends request to 0
-		str = homeid + ": gets request from L:" + localid +", L2 write miss, sends request to Memory Controller:0. This is a small message.";
+		str = homeid + ": gets request from L:" + localid +", L2 write miss, sends request to Memory Controller:0. This is a short message.";
+		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + home2controller * Simulator.C;
 
@@ -74,7 +80,8 @@ public class Writer {
 		Util.addOutput(cycle, str);
 		cycle = cycle + Simulator.d1;
 		
-		str = 0 + ": gets request from H:" + homeid +", gets block from memory, sends blocks to H:" + homeid + ". This is a large message.";
+		str = 0 + ": gets request from H:" + homeid +", gets block from memory, sends blocks to H:" + homeid + ". This is a long message.";
+		Simulator.longCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + home2controller * Simulator.C;
 
@@ -82,7 +89,8 @@ public class Writer {
 		// set state of block to "exclusive" in dir
 		// store to l2
 		// add owner L
-		str = homeid + ": gets block from Memory Controller:0, sends blocks to L:" + localid + ". This is a large message.";
+		str = homeid + ": gets block from Memory Controller:0, sends blocks to L:" + localid + ". This is a long message.";
+		Simulator.longCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + Util.storeBlockToCache(address, "l2", homeid, cycle);
 		processor.l2.directory.blocktable.get(address).state = Directory.MODIFIED_STATE;
@@ -104,29 +112,36 @@ public class Writer {
 		Processor processor = Simulator.processorsTable.get(homeid);
 
 		// 1. L sends request to H
-		String str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
+		String str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a short message.";
+		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
 		cycle = manhattanDistance * Simulator.C + cycle + Simulator.d;
 
 		// 2. H return owner to L
-		str = homeid + ": gets request from L:" + localid +", L2 write hit(exclusive), sends owner to L:" + localid + ". This is a small message.";
+		str = homeid + ": gets request from L:" + localid +", L2 write hit(exclusive), sends owner to L:" + localid + ". This is a short message.";
+		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		cycle = manhattanDistance * Simulator.C + cycle;
 
 		// 3. L get R, sends request to R
 		String remoteid = processor.l2.directory.blocktable.get(address).owner;
-		str = localid + ": gets owner from H:" + homeid +", sends request to R:" + remoteid + ". This is a small message.";
+		str = localid + ": gets owner from H:" + homeid +", sends request to R:" + remoteid + ". This is a short message.";
+		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		manhattanDistance = Util.getManhattanDistance(localid, remoteid, Simulator.p);
 		cycle = manhattanDistance * Simulator.C + cycle;
 
 		// 4. R sends block to L and H
 		// set state of block to "invalid"
-		str = remoteid + ": gets request from L:" + localid +", sends block to L:" + localid + ". This is a large message.";
+		str = remoteid + ": gets request from L:" + localid +", sends block to L:" + localid + ". This is a long message.";
+		Simulator.longCount++;
 		Util.addOutput(cycle, str);
-		str = remoteid + ": gets request from L:" + localid +", sends inform to H:" + homeid + ". This is a small message.";
-		Util.addOutput(cycle, str);
+		if (!homeid.equals(remoteid)){
+			str = remoteid + ": gets request from L:" + localid +", sends inform to H:" + homeid + ". This is a short message.";
+			Simulator.shortCount++;
+			Util.addOutput(cycle, str);
+		}
 		Util.setBlockStatus(remoteid, address, Directory.INVALID_STATE);
 		int cycleByL = 0;
 		int cycleByH = 0;
@@ -147,8 +162,14 @@ public class Writer {
 		// H change to "exclusive"
 		// store to L2
 		// set owner to L
-		str = homeid + ": gets block from R:" + remoteid + ", sets owner to L:" + localid;
-		Util.addOutput(cycleByH, str);
+		if (!homeid.equals(remoteid)){
+			str = homeid + ": gets block from R:" + remoteid + ", sets owner to L:" + localid;
+			Util.addOutput(cycleByH, str);
+		} else {
+			str = homeid + ": sets owner to L:" + localid;
+			Util.addOutput(cycleByH, str);
+		}
+		
 		processor.l2.directory.blocktable.get(address).state = Directory.MODIFIED_STATE;
 		Util.updateLRU(address, homeid, "l2", cycle + cycleByH);
 		processor.l2.directory.blocktable.get(address).owner = localid;
@@ -164,10 +185,12 @@ public class Writer {
 		String str = "";
 		// 1. L sends request to H
 		if (hit) {
-			str = localid + ": L1 write hit(shared), sends request to H:" + homeid +". This is a small message.";
+			str = localid + ": L1 write hit(shared), sends request to H:" + homeid +". This is a short message.";
+			Simulator.shortCount++;
 			Util.addOutput(cycle, str);
 		} else {
-			str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a small message.";
+			str = localid + ": L1 write miss, sends request to H:" + homeid +". This is a short message.";
+			Simulator.shortCount++;
 			Util.addOutput(cycle, str);
 		}
 		cycle = cycle + manhattanDistance * Simulator.C + Simulator.d;
@@ -179,13 +202,15 @@ public class Writer {
 		Processor.l2.directory.blocktable.get(address).owner = localid;
 		Processor.l2.directory.blocktable.get(address).state = Directory.MODIFIED_STATE;
 		if (hit) {
-			str = homeid + ": gets request from L:" + localid +", sends sharer list to L:" + localid + ". This is a small message.";
+			str = homeid + ": gets request from L:" + localid +", sends sharer list to L:" + localid + ". This is a short message.";
+			Simulator.shortCount++;
 			Util.addOutput(cycle, str);
-			// return a small message
+			// return a short message
 		} else {
-			str = homeid + ": gets request from L:" + localid +", L2 write hit(shared), sends sharer list and block to L:" + localid + ". This is a large message.";
+			str = homeid + ": gets request from L:" + localid +", L2 write hit(shared), sends sharer list and block to L:" + localid + ". This is a long message.";
+			Simulator.longCount++;
 			Util.addOutput(cycle, str);
-			// return a large message
+			// return a long message
 		}
 		cycle = cycle + manhattanDistance * Simulator.C;
 
@@ -211,12 +236,13 @@ public class Writer {
 			// 3. L sends invalidating message to sharers
 			// set state to exclusive
 			if (hit) {
-				str = localid + ": gets sharer list from H:" + homeid + ", sends invalidating message to Rs. Those are small messages";
+				str = localid + ": gets sharer list from H:" + homeid + ", sends invalidating message to Rs. Those are short messages";
 				Util.addOutput(cycle, str);
 			} else {
-				str = localid + ": gets sharer list and block from H:" + homeid + ", sends invalidating message to Rs. Those are small messages";
+				str = localid + ": gets sharer list and block from H:" + homeid + ", sends invalidating message to Rs. Those are short messages";
 				Util.addOutput(cycle, str);
 			}
+			// no need to add message count here, I will add then in the next iteration
 			
 			if (!hit) {
 				cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
@@ -227,7 +253,10 @@ public class Writer {
 				String rn = Processor.l2.directory.blocktable.get(address).sharers.get(i);
 				if (!rn.equals(localid)){
 					int latency = Util.getManhattanDistance(localid, rn, Simulator.p);
-					str = rn + ": gets invalidating message from L:" + localid + ", sends ack message to L:" + localid + ". this is small messages";
+					str = rn + ": gets invalidating message from L:" + localid + ", sends ack message to L:" + localid + ". this is short messages";
+					// Since I haven't add count in the last step, so I have add here twice
+					Simulator.shortCount++;
+					Simulator.shortCount++;
 					Util.addOutput(cycle + latency * Simulator.C, str);
 					if (latency > longestLatency) {
 						longestLatency = latency;

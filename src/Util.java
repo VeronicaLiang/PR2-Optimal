@@ -317,4 +317,26 @@ public class Util {
 			}
 		}
 	}
+	
+	public static void addCount(String coreid, int l, boolean hit) {
+		Processor pro = Simulator.processorsTable.get(coreid);
+		if(hit) {
+			if (l == 1){
+				pro.l1HitCount++;
+			} else if (l == 2){
+				pro.l2HitCount++;
+			}
+		} else {
+			if (l == 1){
+				pro.l1MissCount++;
+			} else if (l == 2){
+				pro.l2MissCount++;
+			}
+		}
+	}
+	
+	public static void addPenalty(String coreid, int penalty) {
+		Processor pro = Simulator.processorsTable.get(coreid);
+		pro.penalty = pro.penalty + penalty;
+	}
 }

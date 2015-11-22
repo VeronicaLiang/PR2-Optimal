@@ -51,10 +51,15 @@ public class Simulator {
 	public static int d1 = 0;
 
 	public static HashMap<String, Processor> processorsTable = new HashMap<String, Processor>();
-	public static HashMap<Integer, ArrayList<String>> outputList = new HashMap<Integer, ArrayList<String>>();
-	public HashMap<String, TraceItem> waitingList = new HashMap<String,TraceItem>();
+	public HashMap<String, ArrayList<TraceItem>> waitingList = new HashMap<String, ArrayList<TraceItem>>();
 	//public ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
 	public Hashtable<Integer, ArrayList<String>> runningList = new Hashtable<Integer, ArrayList<String>>();
+	
+	public static HashMap<Integer, ArrayList<String>> outputList = new HashMap<Integer, ArrayList<String>>();
+	public ArrayList<String> traceList = new ArrayList<String>();
+	public Hashtable<String, String> startAndFinish = new Hashtable<String, String>();
+	public static int shortCount = 0;
+	public static int longCount = 0;
 
 	public Simulator(String inputFile) {
 		Hashtable<Integer, ArrayList<TraceItem>> commands = initializeUnits(inputFile);
@@ -91,6 +96,12 @@ public class Simulator {
 							lastCycle = finishCycle;
 						}
 						
+						// add penalty count
+						Util.addPenalty(cur.coreid, finishCycle - clockcycle);
+						
+						// add to start and finish map for output
+						startAndFinish.put(cur.tag, "Start Cycle: " + clockcycle + "\tFinish Cycle: " + finishCycle + "\tCost: " + (finishCycle - clockcycle));
+						
 						// add to running list
 						if (runningList.containsKey(finishCycle)) {
 							runningList.get(finishCycle).add(cur.tag);
@@ -112,7 +123,10 @@ public class Simulator {
 				tags = runningList.get(clockcycle);
 				for (int i = 0; i < tags.size(); i++) {
 					if (waitingList.containsKey(tags.get(i))){
-						readyList.add(waitingList.get(tags.get(i)));
+						instructions = waitingList.get(tags.get(i));
+						for (int j = 0; j < instructions.size(); j++) {
+							readyList.add(instructions.get(j));
+						}
 						waitingList.remove(tags.get(i));
 					}
 					
@@ -137,6 +151,10 @@ public class Simulator {
 					if (lastCycle < finishCycle) {
 						lastCycle = finishCycle;
 					}
+					// add penalty count
+					Util.addPenalty(cur.coreid, finishCycle - clockcycle);
+					// add to start and finish map for output
+					startAndFinish.put(cur.tag, "Start Cycle: " + clockcycle + "\tFinish Cycle: " + finishCycle + "\tCost: " + (finishCycle - clockcycle));
 					// add to running list
 					if (runningList.containsKey(finishCycle)) {
 						runningList.get(finishCycle).add(cur.tag);
@@ -154,10 +172,14 @@ public class Simulator {
 				tags = runningList.get(clockcycle);
 				for (int i = 0; i < tags.size(); i++) {
 					if (waitingList.containsKey(tags.get(i))){
-						cur = waitingList.get(tags.get(i));
-						cur.error = cur.error - 1;
-						readyList.add(cur);
+						instructions = waitingList.get(tags.get(i));
+						for (int j = 0; j < instructions.size(); j++) {
+							cur = instructions.get(j);
+							cur.error = cur.error - 1;
+							readyList.add(cur);
+						}
 						waitingList.remove(tags.get(i));
+						
 					}
 					
 				}
@@ -181,8 +203,47 @@ public class Simulator {
 			}
 			
 		}
+		System.out.println("**********");
+		String s = "";
+		for (int i = 0; i < traceList.size(); i++) {
+			s = traceList.get(i) + "\t";
+			s = s + startAndFinish.get(i + "");
+			System.out.println(s);
+		}
+		if (output) {
+			System.out.println("**********");
+			ArrayList<String> cores = new ArrayList<String>();
+			for (int i = 0; i < Math.pow(2, Simulator.p); i++) {
+				cores.add(i+"");
+			}
+			Util.printStateContent(cores);
+		}
 		
-		Util.dumpOutputList(outputList, lastCycle, inputFile+"-out");
+		System.out.println("**********");
+		for (int i = 0; i < Math.pow(2, Simulator.p); i++) {
+			Processor pro = Simulator.processorsTable.get(i + "");
+			System.out.println("----------");
+			System.out.println("Core: " + i);
+			if (pro.l1HitCount + pro.l1MissCount != 0) {
+				System.out.println("L1 hit rate is " + (pro.l1HitCount * 1.0) / ((pro.l1HitCount + pro.l1MissCount) * 1.0));
+				System.out.println("L1 miss rate is " + (pro.l1MissCount * 1.0) / ((pro.l1HitCount + pro.l1MissCount) * 1.0));
+				System.out.println("Average miss penalty for L1 is " + (pro.penalty * 1.0) / (pro.l1MissCount * 1.0));
+			} else {
+				System.out.println("No operation on L1");
+			}
+			if (pro.l2HitCount + pro.l2MissCount != 0) {
+				System.out.println("L2 hit rate is " + (pro.l2HitCount * 1.0) / ((pro.l2HitCount + pro.l2MissCount) * 1.0));
+				System.out.println("L2 miss rate is " + (pro.l2MissCount * 1.0) / ((pro.l2HitCount + pro.l2MissCount) * 1.0));
+			} else {
+				System.out.println("No operation on L2");
+			}
+			System.out.println("----------");
+
+		}
+		System.out.println("**********");
+		System.out.println("Number of control messages: " + shortCount);
+		System.out.println("Number of data messages: " + longCount);
+		Util.dumpOutputList(outputList, lastCycle, inputFile + "-out");
 
 		
 	}
@@ -235,6 +296,7 @@ public class Simulator {
 			int maxCycle = 0;
 			while ((line = bufferedreader.readLine()) != null) {
 				if (!line.trim().equals("")){
+					traceList.add(line);
 					String[] ss = line.split("\t");
 					TraceItem item = new TraceItem();
 					item.cycle = Integer.parseInt(ss[0]);
@@ -283,7 +345,14 @@ public class Simulator {
 							items.get(j).consecutive = true;
 							items.get(j).previous = htlast.get(items.get(j).coreid).tag;
 							items.get(j).error = items.get(j).cycle - htlast.get(items.get(j).coreid).cycle;
-							waitingList.put(htlast.get(items.get(j).coreid).tag, items.get(j));
+							//waitingList.put(htlast.get(items.get(j).coreid).tag, items.get(j));
+							if (waitingList.containsKey(htlast.get(items.get(j).coreid).tag)) {
+								waitingList.get(htlast.get(items.get(j).coreid).tag).add(items.get(j));
+							} else {
+								ArrayList<TraceItem> tmp = new ArrayList<TraceItem>();
+								tmp.add(items.get(j));
+								waitingList.put(htlast.get(items.get(j).coreid).tag, tmp);
+							}
 						}
 					}
 					htlast = (Hashtable<String, TraceItem>) htnow.clone();
