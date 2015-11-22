@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +15,29 @@ public class Util {
 				System.out.println("Cycle " + cycle + " --> " + strList.get(j));
 			}
 		}
+	}
+	
+	public static void dumpOutputList(HashMap<Integer, ArrayList<String>> outputList, int lastCycle, String file) {
+		try {  
+            FileWriter fileWriter = new FileWriter(file);  
+            String s = "";
+            ArrayList<String> strList = new ArrayList<String>();
+            for (int i = 1; i <= lastCycle; i++) {
+            	if (outputList.containsKey(i)){
+            		strList = outputList.get(i);
+        			for (int j = 0; j < strList.size(); j++) {
+        				s = "Cycle " + i + " --> " + strList.get(j) + "\r\n";
+        				fileWriter.write(s); 
+        			}
+            	}
+            }
+            fileWriter.close();  
+              
+  
+        } catch (IOException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        }  
 	}
 
 	// TODO check whether this calculation is correct
@@ -227,8 +252,8 @@ public class Util {
 			String setlocl2 = address.substring(31 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b + 1);
 			String tag = address.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
 			for (int i = 0; i < pro.l2.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.size(); i++){
-				if(pro.l1.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).tag.equals(tag)){
-					pro.l1.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).cur_cycle=cycle;
+				if(pro.l2.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).tag.equals(tag)){
+					pro.l2.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).cur_cycle=cycle;
 				}
 			}
 		}

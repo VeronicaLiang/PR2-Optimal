@@ -58,7 +58,7 @@ public class Reader {
 
 		// 3. 0 get data from mem
 		// return to H
-		str = 0 + ": gets request from H:" + homeid +", starts to fetch data from memroy.";
+		str = 0 + ": gets request from H:" + homeid +", starts to fetch data from memory.";
 		Util.addOutput(cycle, str);
 		cycle = cycle + Simulator.d1;
 		

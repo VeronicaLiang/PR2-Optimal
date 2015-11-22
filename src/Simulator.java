@@ -9,6 +9,8 @@ import java.util.Hashtable;
  * input trace file whose name is specified as the second command line input.
  */
 public class Simulator {
+	
+	public static boolean output = true;
 	/*
 	 * The power of processors with a root of 2
 	 */
@@ -115,7 +117,10 @@ public class Simulator {
 				}
 				
 			}
-			Util.printOutputList(outputList, clockcycle);
+			if (output) {
+				Util.printOutputList(outputList, clockcycle);
+			}
+			
 			clockcycle++;
 			if (clockcycle > lastCycle) {
 				finish = true;
@@ -128,6 +133,8 @@ public class Simulator {
 			}
 			
 		}
+		
+		Util.dumpOutputList(outputList, lastCycle, inputFile+"-out");
 
 		
 	}
@@ -179,34 +186,40 @@ public class Simulator {
 			int tag = 0;
 			int maxCycle = 0;
 			while ((line = bufferedreader.readLine()) != null) {
-				String[] ss = line.split(" ");
-				TraceItem item = new TraceItem();
-				item.cycle = Integer.parseInt(ss[0]);
-				if (maxCycle < item.cycle) {
-					maxCycle = item.cycle;
+				if (!line.trim().equals("")){
+					String[] ss = line.split("\t");
+					TraceItem item = new TraceItem();
+					item.cycle = Integer.parseInt(ss[0]);
+					if (maxCycle < item.cycle) {
+						maxCycle = item.cycle;
+					}
+					item.coreid = ss[1];
+					item.operationFlag = Integer.parseInt(ss[2]);
+//					item.address = Util.hexToBinary(ss[3].substring(2));
+					item.origin = Util.hexToBinary(ss[3].substring(2));
+					String pad = "";
+					for (int k=0; k<b; k++){
+						pad += "0";
+					}
+					item.address = item.origin.substring(0,31-b+1) + pad;
+					item.tag = tag + "";
+					tag++;
+					boolean ccexist = commands.containsKey(Integer.parseInt(ss[0]));
+					if (ccexist) {
+						commands.get(Integer.parseInt(ss[0])).add(item);
+					} else {
+						ArrayList<TraceItem> tmp = new ArrayList<TraceItem>();
+						tmp.add(item);
+						commands.put(Integer.parseInt(ss[0]), tmp);
+					}
+					
+					if (output) {
+						System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
+								+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
+					}
+					
 				}
-				item.coreid = ss[1];
-				item.operationFlag = Integer.parseInt(ss[2]);
-//				item.address = Util.hexToBinary(ss[3].substring(2));
-				item.origin = Util.hexToBinary(ss[3].substring(2));
-				String pad = "";
-				for (int k=0; k<b; k++){
-					pad += "0";
-				}
-				item.address = item.origin.substring(0,31-b+1) + pad;
-				item.tag = tag + "";
-				tag++;
-				boolean ccexist = commands.containsKey(Integer.parseInt(ss[0]));
-				if (ccexist) {
-					commands.get(Integer.parseInt(ss[0])).add(item);
-				} else {
-					ArrayList<TraceItem> tmp = new ArrayList<TraceItem>();
-					tmp.add(item);
-					commands.put(Integer.parseInt(ss[0]), tmp);
-				}
-				// traceList.add(item);
-				System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
-						+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
+				
 				
 			}
 			// check if any operations are consecutive
@@ -241,7 +254,8 @@ public class Simulator {
 		boolean test = true;
 		String inputFile = "";
 		if (test) {
-			inputFile = "tracefile-1.txt";
+			Simulator.output = true;
+			inputFile = "readmiss-exclusive.txt";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
 			Simulator.n1 = 14;// The power of the size of every l1 with a root
