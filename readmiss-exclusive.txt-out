@@ -27,4 +27,3 @@ Cycle 1000 --> 1: L1 read miss, sends request to H:0. This is a small message.
 Cycle 1006 --> 0: gets request from L:1, L2 read hit(exclusive), sends owner to L:1. This is a small message.
 Cycle 1009 --> 1: gets owner from H:0, sends request to R:0. This is a small message.
 Cycle 1012 --> 0: gets request from L:1, sends block to L:1. This is a large message.
-Cycle 1012 --> 0: gets request from L:1, sends block to H:0. This is a large message.

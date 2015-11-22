@@ -141,8 +141,11 @@ public class Reader {
 		// set state of block to "shared"
 		str = remoteid + ": gets request from L:" + localid +", sends block to L:" + localid + ". This is a large message.";
 		Util.addOutput(cycle, str);
-		str = remoteid + ": gets request from L:" + localid +", sends block to H:" + homeid + ". This is a large message.";
-		Util.addOutput(cycle, str);
+		if (!homeid.equals(remoteid)){
+			str = remoteid + ": gets request from L:" + localid +", sends block to H:" + homeid + ". This is a large message.";
+			Util.addOutput(cycle, str);
+			
+		}
 		Util.setBlockStatus(remoteid, address, Directory.SHARED_STATE);
 		int cycleByL = 0;
 		int cycleByH = 0;
