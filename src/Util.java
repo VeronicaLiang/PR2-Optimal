@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+
 
 public class Util {
 
@@ -277,4 +279,41 @@ public class Util {
 		return curbloc.address;
 	}
 
+	public static void printStateContent (ArrayList<String> cores){
+		for (int i=0; i<cores.size();i++){
+			String coreid = cores.get(i);
+			Processor pro = Simulator.processorsTable.get(coreid);
+			int noSetsl1 = (int) Math.pow(2, (Simulator.n1 - Simulator.a1 - Simulator.b));
+			int noSetsl2 = (int) Math.pow(2, (Simulator.n2 - Simulator.a2 - Simulator.b));
+			for (int j=0; j<noSetsl1; j++){
+				Set l1set = pro.l1.setsList.get(j);
+				LinkedList<Block> block = l1set.blockList;
+				for(int m=0; m<block.size(); m++){
+					Block cur = block.get(m);
+					if(cur.tag != "") {
+						System.out.println("Processor" + coreid + "->L1->Set" + j + "->Block" + m + ":");
+						System.out.println("\t state:" + cur.state);
+						System.out.println("\t content/tag:" + cur.tag);
+					}
+				}
+			}
+
+			System.out.println("Processor" + coreid + "->L2:");
+			java.util.Set <String> keys = pro.l2.directory.blocktable.keySet();
+			for (String key : keys) {
+				System.out.println("\tblock tag " + key.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1) + ":");
+				System.out.println("\thomenode: " + pro.l2.directory.blocktable.get(key).homeNode);
+				System.out.println("\tstate: " + pro.l2.directory.blocktable.get(key).state);
+				if (pro.l2.directory.blocktable.get(key).state != Directory.INVALID_STATE) {
+					ArrayList<String> sharelist = pro.l2.directory.blocktable.get(key).sharers;
+					System.out.println("\tshare list: ");
+					String outlist = "";
+					for (int n = 0; n < sharelist.size(); n++) {
+						outlist += sharelist.get(n) + "\t";
+					}
+					System.out.println(outlist);
+				}
+			}
+		}
+	}
 }
