@@ -8,11 +8,6 @@ Cycle 104 --> 0: gets block from H:0, read block.
 Cycle 105 --> 0: L1 write miss, sends request to H:0. This is a small message.
 Cycle 108 --> 0: gets request from L:0, L2 write miss, sends request to Memory Controller:0. This is a small message.
 Cycle 108 --> 0: gets request from H:0, starts to fetch data from memory.
-Cycle 155 --> 1: L1 read miss, sends request to H:0. This is a small message.
-Cycle 161 --> 0: gets request from L:1, L2 read hit(exclusive), sends owner to L:1. This is a small message.
-Cycle 164 --> 1: gets owner from H:0, sends request to R:0. This is a small message.
-Cycle 167 --> 0: gets request from L:1, sends block to L:1. This is a large message.
-Cycle 167 --> 0: gets request from L:1, sends block to H:0. This is a large message.
 Cycle 208 --> 0: gets request from H:0, gets block from memory, sends blocks to H:0. This is a large message.
 Cycle 208 --> 0: gets block from Memory Controller:0, sends blocks to L:0. This is a large message.
 Cycle 208 --> 0: gets block from H:0, write block
@@ -28,3 +23,8 @@ Cycle 316 --> 0: gets request from H:0, starts to fetch data from memory.
 Cycle 416 --> 0: gets request from H:0, gets block from memory, sends blocks to H:0. This is a large message.
 Cycle 416 --> 0: gets block from Memory Controller:0, sends blocks to L:0. This is a large message.
 Cycle 416 --> 0: gets block from H:0, read block.
+Cycle 1000 --> 1: L1 read miss, sends request to H:0. This is a small message.
+Cycle 1006 --> 0: gets request from L:1, L2 read hit(exclusive), sends owner to L:1. This is a small message.
+Cycle 1009 --> 1: gets owner from H:0, sends request to R:0. This is a small message.
+Cycle 1012 --> 0: gets request from L:1, sends block to L:1. This is a large message.
+Cycle 1012 --> 0: gets request from L:1, sends block to H:0. This is a large message.

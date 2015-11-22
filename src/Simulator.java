@@ -122,7 +122,7 @@ public class Simulator {
 			}
 			
 			clockcycle++;
-			if (clockcycle > lastCycle) {
+			if (clockcycle > lastCycle && commands.size() == 0) {
 				finish = true;
 				for (int i = 0; i < waitingList.size(); i++) {
 					if (!waitingList.get(i).issued){
