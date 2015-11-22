@@ -1,5 +1,4 @@
-import java.util.Enumeration;
-import java.util.Set;
+
 
 public class Writer {
 	public Writer() {
@@ -250,7 +249,7 @@ public class Writer {
 			cycle = cycle + longestLatency * Simulator.C;
 
 			// L get ack, perform write
-			str = localid + ": gets all ack from Rs:, write block.";
+			str = localid + ": gets all ack from Rs, write block.";
 			Util.addOutput(cycle, str);
 			Util.updateLRU(address, localid, "l1", cycle);
 		}

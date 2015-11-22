@@ -132,6 +132,7 @@ public class Simulator {
 		
 	}
 
+	@SuppressWarnings({ "unchecked", "resource" })
 	Hashtable<Integer, ArrayList<TraceItem>> initializeUnits(String inputFile) {
 		// Initialize
 		// processors===============================================================
@@ -148,7 +149,7 @@ public class Simulator {
 		// int numberOfSetInL1 = numberOfBlocksInL1/associativityOfL1;
 		int numberOfSetInL1 = (int) Math.pow(base, (n1 - a1 - b));
 
-		// the size of l1
+		// the size of l2
 		int sizeOfl2 = (int) Math.pow(base, n2);
 		// the number of blocks in the l2=the size of l2/the size of a block
 		int numberOfBlocksInL2 = sizeOfl2 / ((int) Math.pow(base, b));
