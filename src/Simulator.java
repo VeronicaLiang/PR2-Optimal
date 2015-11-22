@@ -9,6 +9,8 @@ import java.util.Hashtable;
  * input trace file whose name is specified as the second command line input.
  */
 public class Simulator {
+	
+	public static boolean output = true;
 	/*
 	 * The power of processors with a root of 2
 	 */
@@ -115,7 +117,10 @@ public class Simulator {
 				}
 				
 			}
-			Util.printOutputList(outputList, clockcycle);
+			if (output) {
+				Util.printOutputList(outputList, clockcycle);
+			}
+			
 			clockcycle++;
 			if (clockcycle > lastCycle) {
 				finish = true;
@@ -206,8 +211,11 @@ public class Simulator {
 						commands.put(Integer.parseInt(ss[0]), tmp);
 					}
 					
-					System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
-							+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
+					if (output) {
+						System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
+								+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
+					}
+					
 				}
 				
 				
@@ -244,6 +252,7 @@ public class Simulator {
 		boolean test = true;
 		String inputFile = "";
 		if (test) {
+			Simulator.output = false;
 			inputFile = "trace2";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
