@@ -207,6 +207,9 @@ public class Util {
 		for (int i = 0; i < pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.size(); i++){
 			if(pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).tag.equals(tag)){
 				pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).state = blockStatus;
+				if(blockStatus == Directory.INVALID_STATE){
+					pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(i).data = 0;
+				}
 			}
 		}
 	}
