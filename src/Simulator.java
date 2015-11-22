@@ -254,8 +254,8 @@ public class Simulator {
 		boolean test = true;
 		String inputFile = "";
 		if (test) {
-			Simulator.output = false;
-			inputFile = "trace2";
+			Simulator.output = true;
+			inputFile = "readmiss-exclusive.txt";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
 			Simulator.n1 = 14;// The power of the size of every l1 with a root

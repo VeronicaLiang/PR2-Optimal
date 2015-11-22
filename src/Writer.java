@@ -81,12 +81,12 @@ public class Writer {
 		// 4. H get data, return to L
 		// set state of block to "exclusive" in dir
 		// store to l2
-		// add sharer L
+		// add owner L
 		str = homeid + ": gets block from Memory Controller:0, sends blocks to L:" + localid + ". This is a large message.";
 		Util.addOutput(cycle, str);
 		cycle = cycle + Util.storeBlockToCache(address, "l2", homeid, cycle);
 		processor.l2.directory.blocktable.get(address).state = Directory.MODIFIED_STATE;
-		processor.l2.directory.blocktable.get(address).sharers.add(localid);
+		processor.l2.directory.blocktable.get(address).owner = localid;
 		cycle = cycle + local2home * Simulator.C;
 
 		// L get data
