@@ -180,7 +180,7 @@ public class Simulator {
 			int maxCycle = 0;
 			while ((line = bufferedreader.readLine()) != null) {
 				if (!line.trim().equals("")){
-					String[] ss = line.split(" ");
+					String[] ss = line.split("\t");
 					TraceItem item = new TraceItem();
 					item.cycle = Integer.parseInt(ss[0]);
 					if (maxCycle < item.cycle) {
@@ -205,7 +205,7 @@ public class Simulator {
 						tmp.add(item);
 						commands.put(Integer.parseInt(ss[0]), tmp);
 					}
-					// traceList.add(item);
+					
 					System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
 							+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
 				}
@@ -244,7 +244,7 @@ public class Simulator {
 		boolean test = true;
 		String inputFile = "";
 		if (test) {
-			inputFile = "tracefile-1.txt";
+			inputFile = "trace2";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
 			Simulator.n1 = 14;// The power of the size of every l1 with a root

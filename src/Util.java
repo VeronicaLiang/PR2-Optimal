@@ -227,8 +227,8 @@ public class Util {
 			String setlocl2 = address.substring(31 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b + 1);
 			String tag = address.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
 			for (int i = 0; i < pro.l2.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.size(); i++){
-				if(pro.l1.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).tag.equals(tag)){
-					pro.l1.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).cur_cycle=cycle;
+				if(pro.l2.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).tag.equals(tag)){
+					pro.l2.setsList.get(Integer.parseInt(setlocl2, 2)).blockList.get(i).cur_cycle=cycle;
 				}
 			}
 		}
