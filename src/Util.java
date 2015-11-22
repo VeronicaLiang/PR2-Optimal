@@ -87,12 +87,14 @@ public class Util {
 			}
 
 			// replace l1 block
+			String replacedBlockadd = getBlockAddress(l1set.blockList.get(oc_index));
 			l1set.blockList.get(oc_index).tag = add.substring(0, 31 - Simulator.n1 + Simulator.a1 + 1);
 			l1set.blockList.get(oc_index).data = 1;
 			l1set.blockList.get(oc_index).cur_cycle = cur_cycle;
+			l1set.blockList.get(oc_index).address = add;
 			Processor homepro = Simulator.processorsTable.get(homeid);
 			// write back to l2
-			String replacedBlockadd = getBlockAddress(l1set.blockList.get(oc_index));
+
 			if (homepro.l2.directory.blocktable.get(replacedBlockadd).state == Directory.SHARED_STATE){
 				homepro.l2.directory.blocktable.get(replacedBlockadd).sharers.remove(coreid);
 			}else{
@@ -105,9 +107,10 @@ public class Util {
 						check.cur_cycle = cur_cycle + Util.getManhattanDistance(coreid, homeid, Simulator.p)*Simulator.C;
 					}
 				}
+				homepro.l2.directory.blocktable.get(replacedBlockadd).state = Directory.SHARED_STATE;
+				homepro.l2.directory.blocktable.get(replacedBlockadd).sharers.remove(coreid);
 			}
-			homepro.l2.directory.blocktable.get(replacedBlockadd).state = Directory.SHARED_STATE;
-			homepro.l2.directory.blocktable.get(replacedBlockadd).sharers.remove(coreid);
+
 			return 0;
 
 		} else if (l.equals("l2")) {
