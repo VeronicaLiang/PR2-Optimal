@@ -52,8 +52,9 @@ public class Simulator {
 
 	public static HashMap<String, Processor> processorsTable = new HashMap<String, Processor>();
 	public static HashMap<Integer, ArrayList<String>> outputList = new HashMap<Integer, ArrayList<String>>();
-	public ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
-	public Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
+	public HashMap<String, TraceItem> waitingList = new HashMap<String,TraceItem>();
+	//public ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
+	public Hashtable<Integer, ArrayList<String>> runningList = new Hashtable<Integer, ArrayList<String>>();
 
 	public Simulator(String inputFile) {
 		Hashtable<Integer, ArrayList<TraceItem>> commands = initializeUnits(inputFile);
@@ -63,16 +64,21 @@ public class Simulator {
 		Writer writer = new Writer();
 		int finishCycle = 0;
 		int lastCycle = 0;
+		ArrayList<TraceItem> instructions = new ArrayList<TraceItem>();
+		ArrayList<String> tags = new ArrayList<String>();
+		ArrayList<TraceItem> readyList = new ArrayList<TraceItem>();
+		TraceItem cur;
+		ArrayList<TraceItem> removeList = new ArrayList<TraceItem>();
 		while (!finish) {
 			// extract all commands need to operate in this clock cycle
 			if(commands.containsKey(clockcycle)){
-				ArrayList<TraceItem> instructions = new ArrayList<TraceItem>();
 				instructions = commands.get(clockcycle);
 				for (int i = 0; i < instructions.size(); i++) {
-					TraceItem cur = instructions.get(i);
+					cur = instructions.get(i);
 					if (cur.consecutive) {
 						// if this trace is consecutive, then add to waiting list
-						waitingList.add(cur);
+						//waitingList.put(cur.previous, cur);
+						//waitingList.add(cur);
 					} else {
 						if (cur.operationFlag == 0) {
 							// Issue a read operation
@@ -84,52 +90,94 @@ public class Simulator {
 						if (lastCycle < finishCycle) {
 							lastCycle = finishCycle;
 						}
-						runningList.put(cur.tag, finishCycle);
+						
+						// add to running list
+						if (runningList.containsKey(finishCycle)) {
+							runningList.get(finishCycle).add(cur.tag);
+						} else {
+							ArrayList<String> tmp = new ArrayList<String>();
+							tmp.add(cur.tag);
+							runningList.put(finishCycle, tmp);
+						}
+						
+						//runningList.put(cur.tag, finishCycle);
 					}
 				}
 				
 				commands.remove(clockcycle);
-			}
-			
-			for (int i = 0; i < waitingList.size(); i++) {
-				TraceItem cur = waitingList.get(i);
-				if (runningList.containsKey(cur.previous)){
-					if (runningList.get(cur.previous) <= clockcycle && !cur.issued) {
-						if (cur.error > 0) {
-							cur.error = cur.error - 1;
-						} else {
-							cur.issued = true;
-							runningList.put(cur.tag, 0);
-							if (cur.operationFlag == 0) {
-								// Issue a read operation
-								finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
-							} else if (cur.operationFlag == 1) {
-								// Issue a write operation
-								finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
-							}
-							if (lastCycle < finishCycle) {
-								lastCycle = finishCycle;
-							}
-							runningList.put(cur.tag, finishCycle);
-						}
-
-					}
-				}
+				
 				
 			}
+			if (runningList.containsKey(clockcycle)){
+				tags = runningList.get(clockcycle);
+				for (int i = 0; i < tags.size(); i++) {
+					if (waitingList.containsKey(tags.get(i))){
+						readyList.add(waitingList.get(tags.get(i)));
+						waitingList.remove(tags.get(i));
+					}
+					
+				}
+				runningList.remove(clockcycle);
+			}
+			
+			removeList = new ArrayList<TraceItem>();
+			for (int i = 0; i < readyList.size(); i++) {
+				cur = readyList.get(i);
+				if (cur.error > 0) {
+					cur.error = cur.error - 1;
+				} else {
+					cur.issued = true;
+					if (cur.operationFlag == 0) {
+						// Issue a read operation
+						finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
+					} else if (cur.operationFlag == 1) {
+						// Issue a write operation
+						finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
+					}
+					if (lastCycle < finishCycle) {
+						lastCycle = finishCycle;
+					}
+					// add to running list
+					if (runningList.containsKey(finishCycle)) {
+						runningList.get(finishCycle).add(cur.tag);
+					} else {
+						ArrayList<String> tmp = new ArrayList<String>();
+						tmp.add(cur.tag);
+						runningList.put(finishCycle, tmp);
+					}
+					removeList.add(cur);
+				}
+			}
+			
+			readyList.removeAll(removeList);
+			if (runningList.containsKey(clockcycle)){
+				tags = runningList.get(clockcycle);
+				for (int i = 0; i < tags.size(); i++) {
+					if (waitingList.containsKey(tags.get(i))){
+						cur = waitingList.get(tags.get(i));
+						cur.error = cur.error - 1;
+						readyList.add(cur);
+						waitingList.remove(tags.get(i));
+					}
+					
+				}
+				runningList.remove(clockcycle);
+			}
+			
+			
+			
 			if (output) {
 				Util.printOutputList(outputList, clockcycle);
 			}
 			
 			clockcycle++;
-			if (clockcycle > lastCycle && commands.size() == 0) {
+			//System.out.println("--------------");
+			//System.out.println(runningList.size());
+			//System.out.println(commands.size());
+			//System.out.println(waitingList.size());
+			//System.out.println(readyList.size());
+			if (runningList.size() == 0 && commands.size() == 0 && waitingList.size() == 0 && readyList.size() == 0) {
 				finish = true;
-				for (int i = 0; i < waitingList.size(); i++) {
-					if (!waitingList.get(i).issued){
-						finish = false;
-						break;
-					}
-				}
 			}
 			
 		}
@@ -235,6 +283,7 @@ public class Simulator {
 							items.get(j).consecutive = true;
 							items.get(j).previous = htlast.get(items.get(j).coreid).tag;
 							items.get(j).error = items.get(j).cycle - htlast.get(items.get(j).coreid).cycle;
+							waitingList.put(htlast.get(items.get(j).coreid).tag, items.get(j));
 						}
 					}
 					htlast = (Hashtable<String, TraceItem>) htnow.clone();
@@ -254,8 +303,8 @@ public class Simulator {
 		boolean test = true;
 		String inputFile = "";
 		if (test) {
-			Simulator.output = true;
-			inputFile = "tracefile-writehitshare";
+			Simulator.output = false;
+			inputFile = "trace1";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
 			Simulator.n1 = 14;// The power of the size of every l1 with a root
