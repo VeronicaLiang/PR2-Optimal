@@ -8,7 +8,7 @@ public class TraceItem {
 	boolean consecutive = false;
 	String previous = "";
 	int error= 0;
-	boolean issued = false;
+	boolean newIssued = true;
 	String origin;
 
 }

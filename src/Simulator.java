@@ -51,7 +51,7 @@ public class Simulator {
 	public static int d1 = 0;
 
 	public static HashMap<String, Processor> processorsTable = new HashMap<String, Processor>();
-	public HashMap<String, ArrayList<TraceItem>> waitingList = new HashMap<String, ArrayList<TraceItem>>();
+	public HashMap<String, TraceItem> waitingList = new HashMap<String, TraceItem>();
 	//public ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
 	public Hashtable<Integer, ArrayList<String>> runningList = new Hashtable<Integer, ArrayList<String>>();
 	
@@ -119,74 +119,95 @@ public class Simulator {
 				
 				
 			}
-			if (runningList.containsKey(clockcycle)){
-				tags = runningList.get(clockcycle);
-				for (int i = 0; i < tags.size(); i++) {
-					if (waitingList.containsKey(tags.get(i))){
-						instructions = waitingList.get(tags.get(i));
-						for (int j = 0; j < instructions.size(); j++) {
-							readyList.add(instructions.get(j));
-						}
-						waitingList.remove(tags.get(i));
-					}
-					
-				}
-				runningList.remove(clockcycle);
-			}
-			
-			removeList = new ArrayList<TraceItem>();
-			for (int i = 0; i < readyList.size(); i++) {
-				cur = readyList.get(i);
-				if (cur.error > 0) {
-					cur.error = cur.error - 1;
-				} else {
-					cur.issued = true;
-					if (cur.operationFlag == 0) {
-						// Issue a read operation
-						finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
-					} else if (cur.operationFlag == 1) {
-						// Issue a write operation
-						finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
-					}
-					if (lastCycle < finishCycle) {
-						lastCycle = finishCycle;
-					}
-					// add penalty count
-					Util.addPenalty(cur.coreid, finishCycle - clockcycle);
-					// add to start and finish map for output
-					startAndFinish.put(cur.tag, "Start Cycle: " + clockcycle + "\tFinish Cycle: " + finishCycle + "\tCost: " + (finishCycle - clockcycle));
-					// add to running list
-					if (runningList.containsKey(finishCycle)) {
-						runningList.get(finishCycle).add(cur.tag);
-					} else {
-						ArrayList<String> tmp = new ArrayList<String>();
-						tmp.add(cur.tag);
-						runningList.put(finishCycle, tmp);
-					}
-					removeList.add(cur);
-				}
-			}
-			
-			readyList.removeAll(removeList);
-			if (runningList.containsKey(clockcycle)){
-				tags = runningList.get(clockcycle);
-				for (int i = 0; i < tags.size(); i++) {
-					if (waitingList.containsKey(tags.get(i))){
-						instructions = waitingList.get(tags.get(i));
-						for (int j = 0; j < instructions.size(); j++) {
-							cur = instructions.get(j);
-							cur.error = cur.error - 1;
+			boolean flag = true;
+			while (runningList.containsKey(clockcycle) || flag) {
+				if (runningList.containsKey(clockcycle)) {
+					tags = runningList.get(clockcycle);
+					for (int i = 0; i < tags.size(); i++) {
+						if (waitingList.containsKey(tags.get(i))) {
+							cur = waitingList.get(tags.get(i));
+							if (clockcycle < cur.cycle) {
+								cur.error = cur.cycle - clockcycle;
+							}
 							readyList.add(cur);
+							waitingList.remove(tags.get(i));
 						}
-						waitingList.remove(tags.get(i));
-						
+
 					}
-					
+					runningList.remove(clockcycle);
 				}
-				runningList.remove(clockcycle);
+				
+				
+				removeList = new ArrayList<TraceItem>();
+				for (int i = 0; i < readyList.size(); i++) {
+					cur = readyList.get(i);
+					if (cur.newIssued) {
+						if (cur.error > 0) {
+							cur.error = cur.error - 1;
+						} else {
+
+							if (cur.operationFlag == 0) {
+								// Issue a read operation
+								finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
+							} else if (cur.operationFlag == 1) {
+								// Issue a write operation
+								finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
+							}
+							if (lastCycle < finishCycle) {
+								lastCycle = finishCycle;
+							}
+							// add penalty count
+							Util.addPenalty(cur.coreid, finishCycle - clockcycle);
+							// add to start and finish map for output
+							startAndFinish.put(cur.tag, "Start Cycle: " + clockcycle + "\tFinish Cycle: " + finishCycle
+									+ "\tCost: " + (finishCycle - clockcycle));
+							// add to running list
+							if (runningList.containsKey(finishCycle)) {
+								runningList.get(finishCycle).add(cur.tag);
+							} else {
+								ArrayList<String> tmp = new ArrayList<String>();
+								tmp.add(cur.tag);
+								runningList.put(finishCycle, tmp);
+							}
+							removeList.add(cur);
+						}
+						cur.newIssued = false;
+					} else if (flag) {
+						if (cur.error > 0) {
+							cur.error = cur.error - 1;
+						} else {
+
+							if (cur.operationFlag == 0) {
+								// Issue a read operation
+								finishCycle = reader.run(cur.coreid, cur.address, clockcycle);
+							} else if (cur.operationFlag == 1) {
+								// Issue a write operation
+								finishCycle = writer.run(cur.address, cur.coreid, clockcycle);
+							}
+							if (lastCycle < finishCycle) {
+								lastCycle = finishCycle;
+							}
+							// add penalty count
+							Util.addPenalty(cur.coreid, finishCycle - clockcycle);
+							// add to start and finish map for output
+							startAndFinish.put(cur.tag, "Start Cycle: " + clockcycle + "\tFinish Cycle: " + finishCycle
+									+ "\tCost: " + (finishCycle - clockcycle));
+							// add to running list
+							if (runningList.containsKey(finishCycle)) {
+								runningList.get(finishCycle).add(cur.tag);
+							} else {
+								ArrayList<String> tmp = new ArrayList<String>();
+								tmp.add(cur.tag);
+								runningList.put(finishCycle, tmp);
+							}
+							removeList.add(cur);
+						}
+					}
+				}
+				flag = false;
+
+				readyList.removeAll(removeList);
 			}
-			
-			
 			
 			if (output) {
 				Util.printOutputList(outputList, clockcycle);
@@ -243,7 +264,7 @@ public class Simulator {
 		System.out.println("**********");
 		System.out.println("Number of control messages: " + shortCount);
 		System.out.println("Number of data messages: " + longCount);
-		Util.dumpOutputList(outputList, lastCycle, inputFile + "-out");
+		//Util.dumpOutputList(outputList, lastCycle, inputFile + "-out");
 
 		
 	}
@@ -323,6 +344,7 @@ public class Simulator {
 						commands.put(Integer.parseInt(ss[0]), tmp);
 					}
 					
+					
 					if (output) {
 						System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
 								+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
@@ -333,13 +355,27 @@ public class Simulator {
 				
 			}
 			// check if any operations are consecutive
-			Hashtable<String, TraceItem> htlast = new Hashtable<String, TraceItem>();
-			Hashtable<String, TraceItem> htnow = new Hashtable<String, TraceItem>();
+			//Hashtable<String, TraceItem> htlast = new Hashtable<String, TraceItem>();
+			//Hashtable<String, TraceItem> htnow = new Hashtable<String, TraceItem>();
+			Hashtable<String, String> tmp = new Hashtable<String, String>();
+			TraceItem[] pros = new TraceItem[(int) Math.pow(2, Simulator.p)];
 			for (int i = 1; i <= maxCycle; i++) {
 				if(commands.containsKey(i)) {
 					ArrayList<TraceItem> items = commands.get(i);
-					htnow = new Hashtable<String, TraceItem>();
+					//htnow = new Hashtable<String, TraceItem>();
 					for (int j = 0; j < items.size(); j++) {
+
+						if (!(pros[Integer.parseInt(items.get(j).coreid)]==null)){
+							items.get(j).consecutive = true;
+							items.get(j).previous = pros[Integer.parseInt(items.get(j).coreid)].tag;
+							items.get(j).error = items.get(j).cycle - pros[Integer.parseInt(items.get(j).coreid)].cycle;
+							waitingList.put(pros[Integer.parseInt(items.get(j).coreid)].tag, items.get(j));
+						}
+						pros[Integer.parseInt(items.get(j).coreid)] = items.get(j);
+						tmp.put(items.get(j).coreid, items.get(j).coreid);
+						
+						
+						/**
 						htnow.put(items.get(j).coreid, items.get(j));
 						if (htlast.containsKey(items.get(j).coreid)) {
 							items.get(j).consecutive = true;
@@ -354,8 +390,16 @@ public class Simulator {
 								waitingList.put(htlast.get(items.get(j).coreid).tag, tmp);
 							}
 						}
+						**/
 					}
-					htlast = (Hashtable<String, TraceItem>) htnow.clone();
+					for (int m = 0; m < Math.pow(2, Simulator.p); m++) {
+						if (!tmp.containsKey(m+"")){
+							pros[m] = null;
+						}
+					}
+					tmp.clear();
+					
+					//htlast = (Hashtable<String, TraceItem>) htnow.clone();
 				}
 			}
 		} catch (Exception e) {
