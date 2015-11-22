@@ -133,6 +133,8 @@ public class Simulator {
 			}
 			
 		}
+		
+		Util.dumpOutputList(outputList, lastCycle, inputFile+"-out");
 
 		
 	}

@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +15,29 @@ public class Util {
 				System.out.println("Cycle " + cycle + " --> " + strList.get(j));
 			}
 		}
+	}
+	
+	public static void dumpOutputList(HashMap<Integer, ArrayList<String>> outputList, int lastCycle, String file) {
+		try {  
+            FileWriter fileWriter = new FileWriter(file);  
+            String s = "";
+            ArrayList<String> strList = new ArrayList<String>();
+            for (int i = 1; i <= lastCycle; i++) {
+            	if (outputList.containsKey(i)){
+            		strList = outputList.get(i);
+        			for (int j = 0; j < strList.size(); j++) {
+        				s = "Cycle " + i + " --> " + strList.get(j) + "\r\n";
+        				fileWriter.write(s); 
+        			}
+            	}
+            }
+            fileWriter.close();  
+              
+  
+        } catch (IOException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        }  
 	}
 
 	// TODO check whether this calculation is correct
