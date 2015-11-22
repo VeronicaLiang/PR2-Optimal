@@ -171,7 +171,7 @@ public class Reader {
 		// store to L1
 		// set state of Block to "shared"
 		str = localid + ": gets block from R:" + remoteid + ", read block.";
-		Util.addOutput(cycleByL, str);
+		Util.addOutput(cycle + cycleByL, str);
 		cycleByL = cycleByL + Util.storeBlockToCache(address, "l1", localid, cycleByL);
 		Util.setBlockStatus(localid, address, Directory.SHARED_STATE);
 
@@ -179,11 +179,11 @@ public class Reader {
 		// store to L2
 		// add sharer
 		if (!homeid.equals(remoteid)){
-			str = homeid + ": gets block from R:" + remoteid + ", store block to cache";
-			Util.addOutput(cycleByH, str);
+			str = homeid + ": gets block from R:" + remoteid + ", store block to L2";
+			Util.addOutput(cycle + cycleByH, str);
 		} else {
-			str = homeid + ": store block to cache";
-			Util.addOutput(cycleByH, str);
+			str = homeid + ": store block to L2";
+			Util.addOutput(cycle + cycleByH, str);
 		}
 		processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
 		cycleByH = cycleByH + Util.storeBlockToCache(address, "l2", homeid, cycleByH);
