@@ -132,6 +132,7 @@ public class Simulator {
 		
 	}
 
+	@SuppressWarnings({ "unchecked", "resource" })
 	Hashtable<Integer, ArrayList<TraceItem>> initializeUnits(String inputFile) {
 		// Initialize
 		// processors===============================================================

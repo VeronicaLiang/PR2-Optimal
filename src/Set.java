@@ -10,6 +10,6 @@ public class Set {
 			blockList.add(block);
 		}
 	}
-	LinkedList<Block> blockList = new LinkedList();
+	LinkedList<Block> blockList = new LinkedList<Block>();
 
 }
