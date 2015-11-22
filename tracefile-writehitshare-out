@@ -1,0 +1,19 @@
+Cycle 1 --> 0: L1 read miss, sends request to H:0. This is a small message.
+Cycle 2 --> 1: L1 read miss, sends request to H:0. This is a small message.
+Cycle 2 --> 2: L1 read miss, sends request to H:0. This is a small message.
+Cycle 4 --> 0: gets request from L:0, L2 read miss, sends request to Memory Controller:0. This is a small message.
+Cycle 4 --> 0: gets request from H:0, starts to fetch data from memory.
+Cycle 8 --> 0: gets request from L:1, L2 read hit, sends block to L:1. This is a large message.
+Cycle 11 --> 1: gets block from H:0, read block.
+Cycle 11 --> 0: gets request from L:2, L2 read hit, sends block to L:2. This is a large message.
+Cycle 17 --> 2: gets block from H:0, read block.
+Cycle 104 --> 0: gets request from H:0, gets block from memory, sends blocks to H:0. This is a large message.
+Cycle 104 --> 0: gets block from Memory Controller:0, sends blocks to L:0. This is a large message.
+Cycle 104 --> 0: gets block from H:0, read block.
+Cycle 5000 --> 5: L1 write miss, sends request to H:0. This is a small message.
+Cycle 5009 --> 0: gets request from L:5, L2 write hit(shared), sends sharer list and block to L:5. This is a large message.
+Cycle 5015 --> 5: gets sharer list and block from H:0, sends invalidating message to Rs. Those are small messages
+Cycle 5018 --> 1: gets invalidating message from L:5, sends ack message to L:5. this is small messages
+Cycle 5021 --> 0: gets invalidating message from L:5, sends ack message to L:5. this is small messages
+Cycle 5021 --> 2: gets invalidating message from L:5, sends ack message to L:5. this is small messages
+Cycle 5027 --> 5: gets all ack from Rs, write block.
