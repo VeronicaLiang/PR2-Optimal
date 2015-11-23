@@ -5,6 +5,7 @@ public class Reader {
 	}
 
 	public int run(String coreid, String address, int cycle) {
+		int start = cycle;
 		Processor pro = (Processor) Simulator.processorsTable.get(coreid);
 		boolean l1readHit = Util.hitOrMiss(address, pro, Simulator.n1, Simulator.a1, Simulator.b);
 		if (l1readHit) {
@@ -12,7 +13,9 @@ public class Reader {
 			return readHit(address, coreid, cycle);
 		} else {
 			Util.addCount(coreid, 1, false);
-			return readMiss(address, coreid, cycle);
+			int end = readMiss(address, coreid, cycle);
+			Util.addPenalty(coreid, end - start);
+			return end;
 		}
 	}
 

@@ -59,6 +59,7 @@ public class Simulator {
 	public static HashMap<Integer, ArrayList<String>> outputList = new HashMap<Integer, ArrayList<String>>();
 	public ArrayList<String> traceList = new ArrayList<String>();
 	public Hashtable<String, String> startAndFinish = new Hashtable<String, String>();
+	int[] cycleOfCores = new int[(int)Math.pow(2, Simulator.p)];
 	public static int shortCount = 0;
 	public static int longCount = 0;
 
@@ -75,6 +76,9 @@ public class Simulator {
 		ArrayList<TraceItem> readyList = new ArrayList<TraceItem>();
 		TraceItem cur;
 		ArrayList<TraceItem> removeList = new ArrayList<TraceItem>();
+		for (int i = 0; i < Math.pow(2, Simulator.p); i++) {
+			cycleOfCores[i] = 0;
+		}
 		while (!finish) {
 			// extract all commands need to operate in this clock cycle
 			if(commands.containsKey(clockcycle)){
@@ -98,10 +102,11 @@ public class Simulator {
 						}
 						
 						// add penalty count
-						Util.addPenalty(cur.coreid, finishCycle - clockcycle);
+						//Util.addPenalty(cur.coreid, finishCycle - clockcycle);
 						
 						// add to start and finish map for output
 						startAndFinish.put(cur.tag, "Start Cycle: " + clockcycle + "\tFinish Cycle: " + finishCycle + "\tCost: " + (finishCycle - clockcycle));
+						cycleOfCores[Integer.parseInt(cur.coreid)] = cycleOfCores[Integer.parseInt(cur.coreid)] + (finishCycle - clockcycle);
 						
 						// add to running list
 						if (runningList.containsKey(finishCycle)) {
@@ -158,10 +163,11 @@ public class Simulator {
 								lastCycle = finishCycle;
 							}
 							// add penalty count
-							Util.addPenalty(cur.coreid, finishCycle - clockcycle);
+							//Util.addPenalty(cur.coreid, finishCycle - clockcycle);
 							// add to start and finish map for output
 							startAndFinish.put(cur.tag, "Start Cycle: " + clockcycle + "\tFinish Cycle: " + finishCycle
 									+ "\tCost: " + (finishCycle - clockcycle));
+							cycleOfCores[Integer.parseInt(cur.coreid)] = cycleOfCores[Integer.parseInt(cur.coreid)] + (finishCycle - clockcycle);
 							// add to running list
 							if (runningList.containsKey(finishCycle)) {
 								runningList.get(finishCycle).add(cur.tag);
@@ -189,10 +195,11 @@ public class Simulator {
 								lastCycle = finishCycle;
 							}
 							// add penalty count
-							Util.addPenalty(cur.coreid, finishCycle - clockcycle);
+							//Util.addPenalty(cur.coreid, finishCycle - clockcycle);
 							// add to start and finish map for output
 							startAndFinish.put(cur.tag, "Start Cycle: " + clockcycle + "\tFinish Cycle: " + finishCycle
 									+ "\tCost: " + (finishCycle - clockcycle));
+							cycleOfCores[Integer.parseInt(cur.coreid)] = cycleOfCores[Integer.parseInt(cur.coreid)] + (finishCycle - clockcycle);
 							// add to running list
 							if (runningList.containsKey(finishCycle)) {
 								runningList.get(finishCycle).add(cur.tag);
@@ -227,12 +234,13 @@ public class Simulator {
 		}
 		System.out.println("**********");
 		String s = "";
+		if (output) {
 		for (int i = 0; i < traceList.size(); i++) {
 			s = traceList.get(i) + "\t";
 			s = s + startAndFinish.get(i + "");
 			System.out.println(s);
 		}
-		if (output) {
+		//if (output) {
 			System.out.println("**********");
 			ArrayList<String> cores = new ArrayList<String>();
 			for (int i = 0; i < Math.pow(2, Simulator.p); i++) {
@@ -246,6 +254,7 @@ public class Simulator {
 			Processor pro = Simulator.processorsTable.get(i + "");
 			System.out.println("----------");
 			System.out.println("Core: " + i);
+			System.out.println("# of cycle: " + cycleOfCores[i]);
 			if (pro.l1HitCount + pro.l1MissCount != 0) {
 				System.out.println("L1 hit rate is " + (pro.l1HitCount * 1.0) / ((pro.l1HitCount + pro.l1MissCount) * 1.0));
 				System.out.println("L1 miss rate is " + (pro.l1MissCount * 1.0) / ((pro.l1HitCount + pro.l1MissCount) * 1.0));
@@ -417,14 +426,14 @@ public class Simulator {
 		boolean test = true;
 		String inputFile = "";
 		if (test) {
-			Simulator.output = true;
-			Simulator.dSwitch = true; //true add d, false don't add d
-			inputFile = "readmiss-exclusive.txt";
+			Simulator.output = false;
+			Simulator.dSwitch = false; //true add d, false don't add d
+			inputFile = "trace1";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
 			Simulator.n1 = 14;// The power of the size of every l1 with a root
 								// of 2
-			Simulator.n2 = 19;// The power of the size of every l2 with a root
+			Simulator.n2 = 20;// The power of the size of every l2 with a root
 								// of 2
 			Simulator.b = 6;// The size of a block
 			Simulator.a1 = 2;// The power of the associativity of l1 with a root

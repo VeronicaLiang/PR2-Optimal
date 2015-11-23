@@ -14,13 +14,13 @@ public class Writer {
 
 		if (hit) {
 			int blockStatus = Util.getBlockStatus(coreid, add);
+			Util.addCount(coreid, 1, true);
 			if (blockStatus == Directory.MODIFIED_STATE) {
 				// write hit, exclusive
-				Util.addCount(coreid, 1, true);
+				
 				return hitExclusive(coreid, add, cycle);
 			} else {
 				// write hit, shared
-				Util.addCount(coreid, 1, false);
 				return share(coreid, homeid, add, cycle, hit);
 			}
 		} else {
@@ -32,21 +32,26 @@ public class Writer {
 			// System.out.println(key);
 			// }
 			// System.out.println("************");
+			int start = cycle;
+			Util.addCount(coreid, 1, false);
+			int end = 0;
 			if (homeProcessor.l2.directory.blocktable.containsKey(add)) {
 				// write miss, l2 hit
 				Util.addCount(homeid, 2, true);
 				if (homeProcessor.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE) {
 					// write miss, l2 exclusive
-					return missExclusive(coreid, homeid, add, cycle);
+					end = missExclusive(coreid, homeid, add, cycle);
 				} else {
 					// write miss, l2 shared
-					return share(coreid, homeid, add, cycle, hit);
+					end = share(coreid, homeid, add, cycle, hit);
 				}
 			} else {
 				// write miss, l2 uncached
 				Util.addCount(homeid, 2, false);
-				return uncached(coreid, homeid, add, cycle);
+				end = uncached(coreid, homeid, add, cycle);
 			}
+			Util.addPenalty(coreid, end - start);
+			return end;
 		}
 	}
 
