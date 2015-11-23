@@ -144,11 +144,15 @@ public class Util {
 			Processor homepro = Simulator.processorsTable.get(homeid);
 			OwnerAndSharers tmp = new OwnerAndSharers();
 			tmp.homeNode = homeid;
+			if(homepro.l2.directory.blocktable.containsKey(add)){
+				return 0;
+			}
 			homepro.l2.directory.blocktable.put(add,tmp);
 			String setlocl2 = add.substring(31 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b + 1);
 			Set l2set = homepro.l2.setsList.get(Integer.parseInt(setlocl2, 2));
 			int oldest_cycle = -1;
 			int oc_index = -1;
+
 			for (int i = 0; i < l2set.blockList.size(); i++) {
 				if (l2set.blockList.get(i).data == 0) {
 					l2set.blockList.get(i).tag = add.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1);
