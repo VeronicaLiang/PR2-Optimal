@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -232,15 +234,20 @@ public class Simulator {
 			}
 			
 		}
+		if (output) {
+		System.out.println("**********");
+		System.out.println("Running time table");
 		System.out.println("**********");
 		String s = "";
-		if (output) {
+		
 		for (int i = 0; i < traceList.size(); i++) {
 			s = traceList.get(i) + "\t";
 			s = s + startAndFinish.get(i + "");
 			System.out.println(s);
 		}
 		//if (output) {
+			System.out.println("**********");
+			System.out.println("Cache Status");
 			System.out.println("**********");
 			ArrayList<String> cores = new ArrayList<String>();
 			for (int i = 0; i < Math.pow(2, Simulator.p); i++) {
@@ -250,10 +257,13 @@ public class Simulator {
 		}
 		
 		System.out.println("**********");
+		System.out.println("Cache analysis");
+		System.out.println("**********");
 		for (int i = 0; i < Math.pow(2, Simulator.p); i++) {
 			Processor pro = Simulator.processorsTable.get(i + "");
-			System.out.println("----------");
 			System.out.println("Core: " + i);
+			System.out.println("----------");
+			
 			System.out.println("# of cycle: " + cycleOfCores[i]);
 			if (pro.l1HitCount + pro.l1MissCount != 0) {
 				System.out.println("L1 hit rate is " + (pro.l1HitCount * 1.0) / ((pro.l1HitCount + pro.l1MissCount) * 1.0));
@@ -354,11 +364,12 @@ public class Simulator {
 						commands.put(Integer.parseInt(ss[0]), tmp);
 					}
 					
-					
+					/**
 					if (output) {
 						System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
 								+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
 					}
+					**/
 					
 				}
 				
@@ -422,13 +433,13 @@ public class Simulator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-		boolean test = true;
+		Simulator.output = false;
+		boolean test = false;
+		Simulator.dSwitch = false; //true add d, false don't add d
 		String inputFile = "";
 		if (test) {
 			Simulator.output = false;
-			Simulator.dSwitch = false; //true add d, false don't add d
-			inputFile = "trace1";
+			inputFile = "trace2";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2
 			Simulator.n1 = 14;// The power of the size of every l1 with a root
@@ -448,36 +459,74 @@ public class Simulator {
 							// issued)
 			Simulator.d1 = 100;// The number of cycles caused by a memory access
 		} else {
-			inputFile = args[0];
-			Simulator.p = Integer.parseInt(args[1]);// The power of processors
+			Hashtable<String, String> arg = new Hashtable<String, String>();
+			String file = "config.ini";
+			try {
+				file = args[0];
+			} catch (Exception e) {
+				
+			}
+			
+			String line = null;
+			try {
+				FileReader filereader = new FileReader (file);
+				BufferedReader bufferedreader = new BufferedReader (filereader);
+				while ((line = bufferedreader.readLine()) != null){
+					if(!line.contains("=")){
+						continue;
+					}else{
+						String[] tmp = line.split("=");
+						arg.put(tmp[0].trim(), tmp[1].trim());
+					}
+				}
+			} catch (FileNotFoundException ex){
+				System.out.println("Unable to open file '"+file+"', File Not Found.");
+				System.exit(0);
+			}
+			catch (IOException ex){
+				System.out.println("Error reading file '"+file+"'");
+				System.exit(0);
+			}
+			
+			
+			
+			inputFile = arg.get("filename");
+			Simulator.p = Integer.parseInt(arg.get("p"));// The power of processors
 													// with a root
 			// of 2
-			Simulator.n1 = Integer.parseInt(args[2]);// The power of the size of
+			Simulator.n1 = Integer.parseInt(arg.get("n1"));// The power of the size of
 														// every l1
 			// with a root of 2
-			Simulator.n2 = Integer.parseInt(args[3]);// The power of the size of
+			Simulator.n2 = Integer.parseInt(arg.get("n2"));// The power of the size of
 														// every l2
 			// with a root of 2
-			Simulator.b = Integer.parseInt(args[4]);// The size of a block
-			Simulator.a1 = Integer.parseInt(args[5]);// The power of the
+			Simulator.b = Integer.parseInt(arg.get("b"));// The size of a block
+			Simulator.a1 = Integer.parseInt(arg.get("a1"));// The power of the
 														// associativity of
 			// l1 with a root of 2
-			Simulator.a2 = Integer.parseInt(args[6]);// The power of the
+			Simulator.a2 = Integer.parseInt(arg.get("a2"));// The power of the
 														// associativity of
 			// l2 with a root of 2
-			Simulator.C = Integer.parseInt(args[7]);// The number of delay
+			Simulator.C = Integer.parseInt(arg.get("C"));// The number of delay
 													// cycles caused
 			// by communicating between two
 			// nodes(a node consists of a
 			// processor and l1 cache)
-			Simulator.d = Integer.parseInt(args[8]);// The number of cycles
+			Simulator.d = Integer.parseInt(arg.get("d"));// The number of cycles
 													// caused by a l2
 			// hit(The l1 hit is satisfied in
 			// the same cycle in which it is
 			// issued)
-			Simulator.d1 = Integer.parseInt(args[9]);// The number of cycles
+			Simulator.d1 = Integer.parseInt(arg.get("d1"));// The number of cycles
 														// caused by a
 			// memory access
+			
+			int debug = Integer.parseInt(arg.get("debug"));
+			if (debug == 1) {
+				Simulator.output = true;
+			} else {
+				Simulator.output = false;
+			}
 		}
 
 		new Simulator(inputFile);

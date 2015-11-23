@@ -286,7 +286,10 @@ public class Util {
 
 	public static void printStateContent (ArrayList<String> cores){
 		for (int i=0; i<cores.size();i++){
+			boolean flag = true;
 			String coreid = cores.get(i);
+			System.out.println("Core: " + coreid);
+			System.out.println("----------");
 			Processor pro = Simulator.processorsTable.get(coreid);
 			int noSetsl1 = (int) Math.pow(2, (Simulator.n1 - Simulator.a1 - Simulator.b));
 			int noSetsl2 = (int) Math.pow(2, (Simulator.n2 - Simulator.a2 - Simulator.b));
@@ -296,29 +299,43 @@ public class Util {
 				for(int m=0; m<block.size(); m++){
 					Block cur = block.get(m);
 					if(cur.tag != "") {
-						System.out.println("Processor" + coreid + "->L1->Set" + j + "->Block" + m + ":");
+						System.out.println("L1->Set" + j + "->Block" + m + ":");
 						System.out.println("\t state:" + cur.state);
 						System.out.println("\t content/tag:" + cur.tag);
+						flag = false;
 					}
 				}
 			}
-
-			System.out.println("Processor" + coreid + "->L2:");
-			java.util.Set <String> keys = pro.l2.directory.blocktable.keySet();
-			for (String key : keys) {
-				System.out.println("\tblock tag " + key.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1) + ":");
-				System.out.println("\thomenode: " + pro.l2.directory.blocktable.get(key).homeNode);
-				System.out.println("\tstate: " + pro.l2.directory.blocktable.get(key).state);
-				if (pro.l2.directory.blocktable.get(key).state != Directory.INVALID_STATE) {
-					ArrayList<String> sharelist = pro.l2.directory.blocktable.get(key).sharers;
-					System.out.println("\tshare list: ");
-					String outlist = "";
-					for (int n = 0; n < sharelist.size(); n++) {
-						outlist += sharelist.get(n) + "\t";
+			
+			if(!pro.l2.directory.blocktable.isEmpty()){
+				System.out.println("L2:");
+				java.util.Set <String> keys = pro.l2.directory.blocktable.keySet();
+				for (String key : keys) {
+					System.out.println("\tblock tag " + key.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1) + ":");
+					System.out.println("\thomenode: " + pro.l2.directory.blocktable.get(key).homeNode);
+					System.out.println("\tstate: " + pro.l2.directory.blocktable.get(key).state);
+					if (pro.l2.directory.blocktable.get(key).state != Directory.INVALID_STATE) {
+						ArrayList<String> sharelist = pro.l2.directory.blocktable.get(key).sharers;
+						//System.out.println("\tshare list: ");
+						if (pro.l2.directory.blocktable.get(key).state == Directory.SHARED_STATE) {
+							String outlist = "\tshare list: ";
+							for (int n = 0; n < sharelist.size(); n++) {
+								outlist += sharelist.get(n) + " ";
+							}
+							System.out.println(outlist);
+						} else {
+							System.out.println("\towner: " + pro.l2.directory.blocktable.get(key).owner);
+						}
+						
 					}
-					System.out.println(outlist);
 				}
+				flag = false;
 			}
+			if (flag) {
+				System.out.println("There is no block cached in both L1 and L2.");
+			}
+			System.out.println("----------");
+			
 		}
 	}
 	
