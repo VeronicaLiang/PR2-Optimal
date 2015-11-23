@@ -113,6 +113,9 @@ public class Reader {
 		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
 		cycle = manhattanDistance * Simulator.C + cycle;
+		if (Simulator.dSwitch){
+			cycle = cycle + Simulator.d;
+		}
 
 		// 2. H return block to L
 		// add sharer L
@@ -121,7 +124,10 @@ public class Reader {
 		Simulator.longCount++;
 		Util.addOutput(cycle, str);
 		Util.updateLRU(address, homeid, "l2", cycle);
-		cycle = manhattanDistance * Simulator.C + cycle + Simulator.d;
+		cycle = manhattanDistance * Simulator.C + cycle;
+		if (!Simulator.dSwitch){
+			cycle = cycle + Simulator.d;
+		}
 		processor.l2.directory.blocktable.get(address).sharers.add(localid);
 
 		// L get data

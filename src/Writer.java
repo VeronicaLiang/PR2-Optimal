@@ -67,14 +67,20 @@ public class Writer {
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + local2home * Simulator.C;
-
+		if (Simulator.dSwitch){
+			cycle = cycle + Simulator.d;
+		}
+		
 		// 2. H sends request to 0
 		str = homeid + ": gets request from L:" + localid
 				+ ", L2 write miss, sends request to Memory Controller:0. This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
-		cycle = cycle + home2controller * Simulator.C + Simulator.d;
-
+		cycle = cycle + home2controller * Simulator.C;
+		if (!Simulator.dSwitch){
+			cycle = cycle + Simulator.d;
+		}
+		
 		// 3. 0 get data from mem
 		// return to H
 		str = 0 + ": gets request from H:" + homeid + ", starts to fetch data from memory.";
