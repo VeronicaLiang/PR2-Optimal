@@ -10,6 +10,7 @@ import java.util.Hashtable;
  */
 public class Simulator {
 	
+	public static boolean dSwitch = true;
 	public static boolean output = true;
 	/*
 	 * The power of processors with a root of 2
@@ -417,6 +418,7 @@ public class Simulator {
 		String inputFile = "";
 		if (test) {
 			Simulator.output = true;
+			Simulator.dSwitch = true; //true add d, false don't add d
 			inputFile = "readmiss-exclusive.txt";
 			//inputFile = "/Users/colin/Documents/Work/GitHub/PR2-Optimal/tracefile";
 			Simulator.p = 4;// The power of processors with a root of 2

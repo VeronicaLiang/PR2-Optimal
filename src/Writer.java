@@ -66,14 +66,14 @@ public class Writer {
 		String str = localid + ": L1 write miss, sends request to H:" + homeid + ". This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
-		cycle = cycle + local2home * Simulator.C + Simulator.d;
+		cycle = cycle + local2home * Simulator.C;
 
 		// 2. H sends request to 0
 		str = homeid + ": gets request from L:" + localid
 				+ ", L2 write miss, sends request to Memory Controller:0. This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
-		cycle = cycle + home2controller * Simulator.C;
+		cycle = cycle + home2controller * Simulator.C + Simulator.d;
 
 		// 3. 0 get data from mem
 		// return to H
@@ -120,7 +120,10 @@ public class Writer {
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
-		cycle = manhattanDistance * Simulator.C + cycle + Simulator.d;
+		cycle = manhattanDistance * Simulator.C + cycle;
+		if (Simulator.dSwitch){
+			cycle = cycle + Simulator.d;
+		}
 
 		// 2. H return owner to L
 		str = homeid + ": gets request from L:" + localid + ", L2 write hit(exclusive), sends owner to L:" + localid
@@ -203,7 +206,10 @@ public class Writer {
 			Simulator.shortCount++;
 			Util.addOutput(cycle, str);
 		}
-		cycle = cycle + manhattanDistance * Simulator.C + Simulator.d;
+		cycle = cycle + manhattanDistance * Simulator.C;
+		if (Simulator.dSwitch){
+			cycle = cycle + Simulator.d;
+		}
 
 		// 2. H return sharers list to L.
 		// set block state to "exclusive"
@@ -224,9 +230,13 @@ public class Writer {
 					+ localid + ". This is a long message.";
 			Simulator.longCount++;
 			Util.addOutput(cycle, str);
+			if (!Simulator.dSwitch){
+				cycle = cycle + Simulator.d;
+			}
 			// return a long message
 		}
 		cycle = cycle + manhattanDistance * Simulator.C;
+		
 
 		boolean hit1 = hit && Processor.l2.directory.blocktable.get(address).sharers.size() == 1;
 		boolean miss0 = !hit && Processor.l2.directory.blocktable.get(address).sharers.size() == 0;

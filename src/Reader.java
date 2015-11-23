@@ -55,7 +55,11 @@ public class Reader {
 		String str = localid + ": L1 read miss, sends request to H:" + homeid + ". This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
-		cycle = cycle + local2home * Simulator.C + Simulator.d;
+		
+		cycle = cycle + local2home * Simulator.C;
+		if (Simulator.dSwitch){
+			cycle = cycle + Simulator.d;
+		}
 
 		// 2. H sends request to 0
 		str = homeid + ": gets request from L:" + localid
@@ -108,7 +112,7 @@ public class Reader {
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
-		cycle = manhattanDistance * Simulator.C + cycle + Simulator.d;
+		cycle = manhattanDistance * Simulator.C + cycle;
 
 		// 2. H return block to L
 		// add sharer L
@@ -117,7 +121,7 @@ public class Reader {
 		Simulator.longCount++;
 		Util.addOutput(cycle, str);
 		Util.updateLRU(address, homeid, "l2", cycle);
-		cycle = manhattanDistance * Simulator.C + cycle;
+		cycle = manhattanDistance * Simulator.C + cycle + Simulator.d;
 		processor.l2.directory.blocktable.get(address).sharers.add(localid);
 
 		// L get data
@@ -139,7 +143,10 @@ public class Reader {
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
-		cycle = manhattanDistance * Simulator.C + cycle + Simulator.d;
+		cycle = manhattanDistance * Simulator.C + cycle;
+		if (Simulator.dSwitch){
+			cycle = cycle + Simulator.d;
+		}
 
 		// 2. H return owner to L
 		str = homeid + ": gets request from L:" + localid + ", L2 read hit(exclusive), sends owner to L:" + localid
