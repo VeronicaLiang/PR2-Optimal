@@ -33,7 +33,7 @@ public class Reader {
 			if (pro.l2.directory.blocktable.get(add).state == Directory.SHARED_STATE) {
 				// read miss, l2 shared
 				cur_cycle = shared(coreid, homeid, add, cur_cycle);
-				
+
 			} else if (pro.l2.directory.blocktable.get(add).state == Directory.MODIFIED_STATE) {
 				// read miss, l2 exclusive
 				cur_cycle = exclusive(coreid, homeid, add, cur_cycle);
@@ -52,24 +52,26 @@ public class Reader {
 		Processor processor = Simulator.processorsTable.get(homeid);
 
 		// 1. L sends request to H
-		String str = localid + ": L1 read miss, sends request to H:" + homeid +". This is a short message.";
+		String str = localid + ": L1 read miss, sends request to H:" + homeid + ". This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + local2home * Simulator.C + Simulator.d;
 
 		// 2. H sends request to 0
-		str = homeid + ": gets request from L:" + localid +", L2 read miss, sends request to Memory Controller:0. This is a short message.";
+		str = homeid + ": gets request from L:" + localid
+				+ ", L2 read miss, sends request to Memory Controller:0. This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + home2controller * Simulator.C;
 
 		// 3. 0 get data from mem
 		// return to H
-		str = 0 + ": gets request from H:" + homeid +", starts to fetch data from memory.";
+		str = 0 + ": gets request from H:" + homeid + ", starts to fetch data from memory.";
 		Util.addOutput(cycle, str);
 		cycle = cycle + Simulator.d1;
-		
-		str = 0 + ": gets request from H:" + homeid +", gets block from memory, sends blocks to H:" + homeid + ". This is a long message.";
+
+		str = 0 + ": gets request from H:" + homeid + ", gets block from memory, sends blocks to H:" + homeid
+				+ ". This is a long message.";
 		Simulator.longCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + home2controller * Simulator.C;
@@ -78,7 +80,8 @@ public class Reader {
 		// set state of block to "shared" in dir
 		// store to l2
 		// add sharer L
-		str = homeid + ": gets block from Memory Controller:0, sends blocks to L:" + localid + ". This is a long message.";
+		str = homeid + ": gets block from Memory Controller:0, store to L2, set state of block to shared, add sharer L:"
+				+ localid + ", sends block to L:" + localid + ". This is a long message.";
 		Simulator.longCount++;
 		Util.addOutput(cycle, str);
 		cycle = cycle + Util.storeBlockToCache(address, "l2", homeid, cycle);
@@ -89,7 +92,7 @@ public class Reader {
 		// L get data
 		// store to l1
 		// set state of block to "shared"
-		str = localid + ": gets block from H:" + homeid + ", read block.";
+		str = localid + ": gets block from H:" + homeid + ", store to L1, set state of block to shared, read block.";
 		Util.addOutput(cycle, str);
 		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
 		Util.setBlockStatus(localid, address, Directory.SHARED_STATE);
@@ -101,7 +104,7 @@ public class Reader {
 		Processor processor = Simulator.processorsTable.get(homeid);
 
 		// 1. L sends request to H
-		String str = localid + ": L1 read miss, sends request to H:" + homeid +". This is a short message.";
+		String str = localid + ": L1 read miss, sends request to H:" + homeid + ". This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
@@ -109,7 +112,8 @@ public class Reader {
 
 		// 2. H return block to L
 		// add sharer L
-		str = homeid + ": gets request from L:" + localid +", L2 read hit, sends block to L:" + localid + ". This is a long message.";
+		str = homeid + ": gets request from L:" + localid + ", L2 read hit, add sharer L:" + localid
+				+ ", sends block to L:" + localid + ". This is a long message.";
 		Simulator.longCount++;
 		Util.addOutput(cycle, str);
 		Util.updateLRU(address, homeid, "l2", cycle);
@@ -119,7 +123,7 @@ public class Reader {
 		// L get data
 		// store to l1
 		// set state of block to "shared"
-		str = localid + ": gets block from H:" + homeid + ", read block.";
+		str = localid + ": gets block from H:" + homeid + ", store to L1, set state of block to shared, read block.";
 		Util.addOutput(cycle, str);
 		cycle = cycle + Util.storeBlockToCache(address, "l1", localid, cycle);
 		Util.setBlockStatus(localid, address, Directory.SHARED_STATE);
@@ -131,21 +135,23 @@ public class Reader {
 		Processor processor = Simulator.processorsTable.get(homeid);
 
 		// 1. L sends request to H
-		String str = localid + ": L1 read miss, sends request to H:" + homeid +". This is a short message.";
+		String str = localid + ": L1 read miss, sends request to H:" + homeid + ". This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		int manhattanDistance = Util.getManhattanDistance(localid, homeid, Simulator.p);
 		cycle = manhattanDistance * Simulator.C + cycle + Simulator.d;
 
 		// 2. H return owner to L
-		str = homeid + ": gets request from L:" + localid +", L2 read hit(exclusive), sends owner to L:" + localid + ". This is a short message.";
+		str = homeid + ": gets request from L:" + localid + ", L2 read hit(exclusive), sends owner to L:" + localid
+				+ ". This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		cycle = manhattanDistance * Simulator.C + cycle;
 
 		// 3. L get R, sends request to R
 		String remoteid = processor.l2.directory.blocktable.get(address).owner;
-		str = localid + ": gets owner from H:" + homeid +", sends request to R:" + remoteid + ". This is a short message.";
+		str = localid + ": gets owner from H:" + homeid + ", sends request to R:" + remoteid
+				+ ". This is a short message.";
 		Simulator.shortCount++;
 		Util.addOutput(cycle, str);
 		manhattanDistance = Util.getManhattanDistance(localid, remoteid, Simulator.p);
@@ -153,11 +159,13 @@ public class Reader {
 
 		// 4. R sends block to L and H
 		// set state of block to "shared"
-		str = remoteid + ": gets request from L:" + localid +", sends block to L:" + localid + ". This is a long message.";
+		str = remoteid + ": gets request from L:" + localid + ", set state of block to shared, sends block to L:"
+				+ localid + ". This is a long message.";
 		Simulator.longCount++;
 		Util.addOutput(cycle, str);
-		if (!homeid.equals(remoteid)){
-			str = remoteid + ": gets request from L:" + localid +", sends block to H:" + homeid + ". This is a long message.";
+		if (!homeid.equals(remoteid)) {
+			str = remoteid + ": gets request from L:" + localid + ", set state of block to shared, sends block to H:"
+					+ homeid + ". This is a long message.";
 			Util.addOutput(cycle, str);
 			Simulator.longCount++;
 		}
@@ -170,7 +178,7 @@ public class Reader {
 		// L get block
 		// store to L1
 		// set state of Block to "shared"
-		str = localid + ": gets block from R:" + remoteid + ", read block.";
+		str = localid + ": gets block from R:" + remoteid + ", store to L1, set state of block to shared, read block.";
 		Util.addOutput(cycle + cycleByL, str);
 		cycleByL = cycleByL + Util.storeBlockToCache(address, "l1", localid, cycleByL);
 		Util.setBlockStatus(localid, address, Directory.SHARED_STATE);
@@ -178,11 +186,14 @@ public class Reader {
 		// H change to "shared"
 		// store to L2
 		// add sharer
-		if (!homeid.equals(remoteid)){
-			str = homeid + ": gets block from R:" + remoteid + ", store block to L2";
+		if (!homeid.equals(remoteid)) {
+			str = homeid + ": gets block from R:" + remoteid
+					+ ", store block to L2, set state of block to shared, add sharer L:" + localid + " and R:"
+					+ remoteid;
 			Util.addOutput(cycle + cycleByH, str);
 		} else {
-			str = homeid + ": store block to L2";
+			str = homeid + ": store block to L2, set state of block to shared, add sharer L:" + localid + " and R:"
+					+ remoteid;
 			Util.addOutput(cycle + cycleByH, str);
 		}
 		processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
