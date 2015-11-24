@@ -299,15 +299,15 @@ public class Util {
 					Block cur = block.get(m);
 					if(cur.tag != "") {
 						System.out.println("L1->Set" + j + "->Block" + m + ":");
-						System.out.println("\t state:" + cur.state);
-						System.out.println("\t content/tag:" + cur.tag);
+						System.out.println("\t state: " + cur.state);
+						System.out.println("\t content/tag: " + cur.tag);
 						flag = false;
 					}
 				}
 			}
 			
 			if(!pro.l2.directory.blocktable.isEmpty()){
-				System.out.println("L2:");
+				//System.out.println("L2:");
 				java.util.Set <String> keys = pro.l2.directory.blocktable.keySet();
 				for (String key : keys) {
 					int setindex = Integer.parseInt(key.substring(31 - Simulator.n2 + Simulator.a2 + 1, 31 - Simulator.b+1), 2);
@@ -316,7 +316,7 @@ public class Util {
 					for(int m=0; m<l2blocks.size(); m++){
 						if(key.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1).equals(l2blocks.get(m).tag)) {
 							System.out.println("L2->Set" + setindex + "->Block" + m + ":");
-							System.out.println("\tblock tag " + key.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1) + ":");
+							System.out.println("\tblock tag: " + key.substring(0, 31 - Simulator.n2 + Simulator.a2 + 1));
 							System.out.println("\thomenode: " + pro.l2.directory.blocktable.get(key).homeNode);
 							System.out.println("\tstate: " + pro.l2.directory.blocktable.get(key).state);
 							if (pro.l2.directory.blocktable.get(key).state != Directory.INVALID_STATE) {
